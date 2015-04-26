@@ -1,0 +1,17 @@
+﻿<!-- ft = footer -->
+<div ng-controller="FooterController as footer">
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2">
+                    <ul class="list-no-bullet list-no-padding-left">
+                        <span ng-bind="footer.menu.display"></span>
+                        <li ng-repeat="item in footer.menu.items">
+                            <a class="footer-link" ng-href="{{item.path}}" ng-bind="item.display"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
