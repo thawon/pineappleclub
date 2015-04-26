@@ -32,7 +32,7 @@
 
                 $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
 
-                StateService.changeState("home");
+                StateService.changeState("signout");
             });
         }
     }

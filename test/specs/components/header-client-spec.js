@@ -1,8 +1,8 @@
-﻿"use strict";
+﻿'use strict';
 
-describe("Unit: HeaderClientController", function () {
+describe('Unit: HeaderClientController', function () {
 
-    beforeEach(module("pineappleclub.header-client"));
+    beforeEach(module('pineappleclub.header-client'));
 
     var controller, rootScope, timeout, AUTHORISATIONMock, DEVICE_SIZES, ExportServiceMock, UtilServiceMock;
 
@@ -57,7 +57,7 @@ describe("Unit: HeaderClientController", function () {
             }
         };
 
-        controller = $controller("HeaderClientController", {
+        controller = $controller('HeaderClientController', {
             $rootScope: rootScope,
             $timeout: timeout,
             AUTHORISATION: AUTHORISATIONMock,
@@ -66,44 +66,44 @@ describe("Unit: HeaderClientController", function () {
         });
     }));
 
-    it("header is shown for non-admin page",
+    it('header is shown for non-admin page',
     function () {
         var next = {
-            name: "home",
+            name: 'home',
             data: {
                 authorizedRoles: [AUTHORISATIONMock.USER_ROLES.all]
             }
         };
 
-        rootScope.$broadcast("$stateChangeSuccess", next);
+        rootScope.$broadcast('$stateChangeSuccess', next);
 
         expect(controller.isShown).toBe(true);
     });
 
-    it("header is hidden for admin",
+    it('header is hidden for admin',
     function () {
         var next = {
-            name: "dashboard",
+            name: 'dashboard',
             data: {
                 authorizedRoles: [AUTHORISATIONMock.USER_ROLES.admin]
             }
         };
 
-        rootScope.$broadcast("$stateChangeSuccess", next);
+        rootScope.$broadcast('$stateChangeSuccess', next);
 
         expect(controller.isShown).toBe(false);
     });
 
-    it("header is hidden for login and signout pages",
+    it('header is hidden for login and signout pages',
     function () {
         var next = {
-            name: "login",
+            name: 'login',
             data: {
                 authorizedRoles: [AUTHORISATIONMock.USER_ROLES.admin]
             }
         };
 
-        rootScope.$broadcast("$stateChangeSuccess", next);
+        rootScope.$broadcast('$stateChangeSuccess', next);
 
         expect(controller.isShown).toBe(false);
     });

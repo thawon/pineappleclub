@@ -2,7 +2,9 @@
 
     'use strict';
 
-    angular.module('pineappleclub.auth-service', [])
+    angular.module('pineappleclub.auth-service', [
+        'ngCookies'
+    ])
     .factory('AuthService', AuthService);
 
     AuthService.$inject = [

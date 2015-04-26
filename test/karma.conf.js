@@ -23,14 +23,15 @@ module.exports = function(config) {
         "app/scripts/vendors/angular.min.js",
         "app/scripts/vendors/angular-mocks.js",
         "app/scripts/vendors/angular-cookies.min.js",
+        "app/scripts/vendors/angular-resource.min.js",
+        "app/scripts/vendors/ngProgress.min.js",
         
         "app/scripts/*.js",
         "app/scripts/components/**/*.js",
         "app/scripts/services/**/*.js",
         "app/scripts/constants/*.js",
-
-        "test/specs/*.js",
-        "test/specs/components/**/*.js"
+        
+        "test/specs/**/*.js",
     ],
 
     // list of files / patterns to exclude

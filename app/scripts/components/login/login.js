@@ -3,6 +3,7 @@
     'use strict';
 
     angular.module('pineappleclub.login', [
+        'ngCookies',
         'pineappleclub.auth-service',
         'pineappleclub.state-service',
         'pineappleclub.user-service',
