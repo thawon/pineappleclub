@@ -1,43 +1,44 @@
 ﻿define(
-    ["module", "path", "consolidate"],
+    ['module', 'path', 'consolidate'],
     function (module, path, consolidate) {
         var config = {},
-            dirname = path.normalize(path.dirname(module.uri));
+            dirname = path.normalize(path.dirname(module.uri)),
+            mongoUrl;
 
-        config.basePath = path.normalize(dirname + "/../..");
+        console.log('env: ' + process.env.NODE_ENV);
 
-        console.log("env: " + process.env.NODE_ENV);
-
+        config.basePath = path.normalize(dirname + '/../..');
+        
         config.express = {
             port: process.env.port || 3000,
-            ip: "127.0.0.1",
-            key: "connect.sid",
-            secret: "website.pineappleclub_secret",
+            ip: '127.0.0.1',
+            key: 'connect.sid',
+            secret: 'website.pineappleclub_secret',
             view: {
-                path: config.basePath + "/server/views",
+                path: config.basePath + '/server/views',
                 engine: {
-                    type: "jade",
+                    type: 'jade',
                     driver: consolidate.jade
                 }
             },
 
             // base directory 
-            staticPath: config.basePath + "/app",
+            staticPath: config.basePath + '/app',
 
             // shared libraries
-            sharedLibPath: config.basePath + "/shared-lib"
+            sharedLibPath: config.basePath + '/shared-lib'
         };
 
-        var mongoUrl = (!process.env.NODE_ENV)
-                        // development connection string
-                        ? "mongodb://localhost:27017/pineappleclub"
-                        // production connection string
-                        : "mongodb://pineappleclub:CB_FhmudQikwCHn6eK.e3NShH6dvjC_gCpbIMllNJBw-@ds060977.mongolab.com:60977/pineappleclub";
+        mongoUrl = (!process.env.NODE_ENV)
+                    // development connection string
+                    ? 'mongodb://localhost:27017/pineappleclub'
+                    // production connection string
+                    : 'mongodb://pineappleclub:CB_FhmudQikwCHn6eK.e3NShH6dvjC_gCpbIMllNJBw-@ds060977.mongolab.com:60977/pineappleclub';
 
-        console.log("mongo url: " + mongoUrl);
+        console.log('mongo url: ' + mongoUrl);
 
         config.db = {
-            database: "pineappleclub",
+            database: 'pineappleclub',
             url: mongoUrl
         };
 

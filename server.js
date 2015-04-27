@@ -15,6 +15,8 @@ requirejs.config({
 
         routes: "server/routes",
 
+        util: "server/util",
+
         authentication: "server/authentication",
 
         sharedLib: "shared-lib",
