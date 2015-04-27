@@ -53,7 +53,7 @@ describe('Unit: ApplicationController', function () {
 
         controller = createController();
 
-        spyOn(controller, "setCurrentUser");
+        spyOn(controller, 'setCurrentUser');
 
         rootScope.$apply();
 
@@ -74,7 +74,7 @@ describe('Unit: ApplicationController', function () {
 
         controller = createController();
 
-        spyOn(controller, "setCurrentUser");
+        spyOn(controller, 'setCurrentUser');
 
         rootScope.$apply();
 

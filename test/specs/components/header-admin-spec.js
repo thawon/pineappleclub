@@ -1,8 +1,8 @@
-﻿"use strict";
+﻿'use strict';
 
-describe("Unit: HeaderAdminController", function () {
+describe('Unit: HeaderAdminController', function () {
 
-    beforeEach(module("pineappleclub.header-admin"));
+    beforeEach(module('pineappleclub.header-admin'));
 
     var controller, rootScope, $q, AuthServiceMock, StateServiceMock, UserServiceMock, AUTH_EVENTS;
 
@@ -26,11 +26,11 @@ describe("Unit: HeaderAdminController", function () {
         };
 
         
-        spyOn(rootScope, "$broadcast");
-        spyOn(StateServiceMock, "changeState");
-        spyOn(UserServiceMock, "setCurrentUser");
+        spyOn(rootScope, '$broadcast');
+        spyOn(StateServiceMock, 'changeState');
+        spyOn(UserServiceMock, 'setCurrentUser');
 
-        controller = $controller("HeaderAdminController", {
+        controller = $controller('HeaderAdminController', {
             $rootScope: rootScope,            
             AuthService: AuthServiceMock,
             StateService: StateServiceMock,
@@ -38,9 +38,9 @@ describe("Unit: HeaderAdminController", function () {
         });
     }));
 
-    it("current user is cleared after a successful logout",
+    it('current user is cleared after a successful logout',
     function () {
-        spyOn(AuthServiceMock, "logout").andCallFake(function () {
+        spyOn(AuthServiceMock, 'logout').andCallFake(function () {
             var deferred = $q.defer();
 
             deferred.resolve({ success: true });
@@ -56,6 +56,6 @@ describe("Unit: HeaderAdminController", function () {
         expect(UserServiceMock.setCurrentUser).toHaveBeenCalledWith(null);
         expect(rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.logoutSuccess);
 
-        expect(StateServiceMock.changeState).toHaveBeenCalledWith("signout");
+        expect(StateServiceMock.changeState).toHaveBeenCalledWith('signout');
     });
 });

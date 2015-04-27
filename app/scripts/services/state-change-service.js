@@ -12,7 +12,7 @@
     .factory('StateChangeService', StateChangeService);
 
     StateChangeService.$inject = [
-        "$rootScope",
+        '$rootScope',
         'AuthService',
         'StateService',
         'AUTH_EVENTS',
@@ -38,7 +38,7 @@
 
             } else {
 
-                StateService.changeState('home');
+                StateService.changeState('login');
 
                 if (AuthService.isAuthenticated()) {
                     // user is not allowed
