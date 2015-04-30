@@ -62,7 +62,6 @@
             return $http.post('/authenticated')
                 .then(function (res) {
                     var data = res.data;
-
                     if (data.success) {
                         setCurrentUser(data.user.local);
                     }

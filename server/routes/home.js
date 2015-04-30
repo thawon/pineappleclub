@@ -2,10 +2,10 @@
     ['express', 'config/config', 'util/dev-script-builder'],
     function (express, config, builder) {
         var router = express.Router();
-            
+
         // catch all route for history
         router.get('*', function (req, res) {
-            var scripts = ['scrips/pc.min.js'],
+            var scripts = ['scripts/pc.min.js'],
                 dir = config.express.staticPath + '/scripts',
                 excludeDirs = [
                     'vendors'
@@ -14,7 +14,7 @@
                     'pc.js',
                     'pc.min.js'
                 ];
-            
+
             if (!process.env.NODE_ENV) {
                 scripts = builder.build(dir, excludeDirs, excludeFiles)
             }

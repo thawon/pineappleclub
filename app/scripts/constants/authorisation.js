@@ -101,6 +101,18 @@
                             description: "admin user authentication"
                         }
                     }
+                },
+                {
+                    name: 'signout',
+                    url: '/signout',
+                    templateUrl: 'scripts/components/signout/signout.html',
+                    data: {
+                        authorizedRoles: [USER_ROLES.all],
+                        page: {
+                            title: "Signout",
+                            description: "User is signed out"
+                        }
+                    }
                 }
             ]
     };

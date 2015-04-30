@@ -7,14 +7,14 @@ module.exports = function (grunt) {
             dev: {
                 options: {
                     script: "server.js",
-                    node_env: undefined,
                     debug: true
                 }
             },
             test: {
                 options: {
                     script: "server.js",
-                    node_env: undefined
+                    node_env: "test",
+                    debug: true
                 }
             }
         },
@@ -28,9 +28,8 @@ module.exports = function (grunt) {
                     "./app/scripts/components/**/*.less"
                 ],
                 tasks: ["less"]
-            }
-            ,
-            server: {
+            },
+            dev: {
                 files: ["./server/**/*"],
                 tasks: ["express:dev"],
                 options: {
@@ -38,7 +37,17 @@ module.exports = function (grunt) {
                     nospawn: true,
                     atBegin: true
                 }
+            },
+            test: {
+                files: ["./server/**/*"],
+                tasks: ["express:test"],
+                options: {
+                    //Without this option specified express won't be reloaded
+                    nospawn: true,
+                    atBegin: true
+                }
             }
+
         },
         "node-inspector": {
             dev: {
@@ -66,21 +75,9 @@ module.exports = function (grunt) {
                 singleRun: true
             }
         },
-        protractor_webdriver: {
-            options: {
-                // Task-specific options go here.
-            },
-            your_target: {
-                options: {
-                    command: "webdriver-manager start",
-                    keepAlive: true
-                }
-            }
-        },
         protractor: {
             options: {
-                configFile: "test/protractor.conf.js",
-                keepAlive: true
+                configFile: "test/protractor.conf.js"
             },
             run: {}
         },
@@ -119,7 +116,7 @@ module.exports = function (grunt) {
                         args: ["watch:frontend"]
                     }, {
                         grunt: true,
-                        args: ["watch:server"]
+                        args: ["watch:dev"]
                     }, {
                         grunt: true,
                         args: ["node-inspector:dev"]
@@ -131,7 +128,10 @@ module.exports = function (grunt) {
                 },
                 tasks: [{
                     grunt: true,
-                    args: ["karma:unit"]
+                    args: ["watch:test"]
+                }, {
+                    grunt: true,
+                    args: ["protractor"]
                 }]
             }
         }
@@ -149,18 +149,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-parallel");
     grunt.loadNpmTasks("grunt-ng-annotate");
     grunt.loadNpmTasks("grunt-contrib-uglify");
-    // test
-    grunt.registerTask("test", "run specs",
-    ["parallel:test"]);
 
-    // development
-    grunt.registerTask("dev", "launch webserver and watch task",
+    grunt.registerTask("dev", "launch webserver in dev mode and watch task",
     ["parallel:dev"]);
 
-    // production
-    grunt.registerTask("prod", "minifies js files",
-    ["requirejs:prod"]);
-
-    grunt.registerTask("a", "run",
-    ["ngAnnotate", "uglify"]);
+    // Note: web driver must be started manually prior to running. "webdriver-manager start"
+    grunt.registerTask("test", "run specs, launch webserver in test mode then run e2e on minified file",
+    ["ngAnnotate", "uglify", "karma:unit", "parallel:test"]);
 };

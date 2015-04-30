@@ -13,12 +13,19 @@
         'pineappleclub.contact',
         'pineappleclub.photos',
         'pineappleclub.header-client',
+        'pineappleclub.header-admin',
         'pineappleclub.footer',
         'pineappleclub.side-bar',
-        'pineappleclub.authorisation-constant'
+        'pineappleclub.dashboard',
+        'pineappleclub.login',
+        'pineappleclub.authorisation-constant',
+        'pineappleclub.state-change-service',
+        'pineappleclub.auth-interceptor-service'
     ])
-    .config(['$locationProvider', '$stateProvider', '$urlRouterProvider', 'AUTHORISATION',
-    function ($locationProvider, $stateProvider, $urlRouterProvider, AUTHORISATION) {
+    .config(['$locationProvider', '$stateProvider', '$urlRouterProvider', '$httpProvider',
+        'AUTHORISATION',
+    function ($locationProvider, $stateProvider, $urlRouterProvider, $httpProvider,
+        AUTHORISATION) {
 
         $locationProvider.html5Mode({
             enabled: true
@@ -36,7 +43,20 @@
                 })
         });
 
-    }]);
+        $httpProvider.interceptors.push("AuthInterceptor");
+    }])
+    .run(['$rootScope', 'StateChangeService', 'ngProgress',
+    function ($rootScope, StateChangeService, ngProgress) {
+
+        $rootScope.$on("$stateChangeStart", function (event, next) {
+            StateChangeService.change(next.data.authorizedRoles);
+        });
+
+        $rootScope.$on("$stateChangeSuccess", function (event, next) {
+            ngProgress.complete();
+        });
+
+    }]);;
 
 }());
 (function () {
@@ -46,21 +66,25 @@
     angular.module('pineappleclub.application', [
         'ngProgress',
         'pineappleclub.app-configuration-service',
-        'pineappleclub.auth-service'
+        'pineappleclub.auth-service',
+        'pineappleclub.user-service'
     ])
     .controller('ApplicationController', ApplicationController);
 
     ApplicationController.$inject = [
         'ngProgress',
         'AppConfigurationService',
-        'AuthService'
+        'AuthService',
+        'UserService'
     ];
 
-    function ApplicationController(ngProgress, AppConfigurationService, AuthService) {
+    function ApplicationController(ngProgress, AppConfigurationService,
+        AuthService, UserService) {
+
         var that = this;
 
         that.setCurrentUser = function (user) {
-            that.currentUser = user;
+            UserService.setCurrentUser(user);
         }
 
         // setting progress bar color
@@ -104,6 +128,22 @@
 
     'use strict';
 
+    angular.module('pineappleclub.dashboard', [])
+    .controller('DashboardController', DashboardController);
+
+    DashboardController.$inject = [];
+
+    function DashboardController() {
+
+        var that = this;
+
+    }
+
+}());
+(function () {
+
+    'use strict';
+
     angular.module('pineappleclub.footer', [
         'pineappleclub.navigator-service'
     ])
@@ -125,37 +165,42 @@
 
     'use strict';
 
-    angular.module('pineappleclub.header-admin', [])
-        .controller('HeaderAdminController', HeaderAdminController);
+    angular.module('pineappleclub.header-admin', [
+        'pineappleclub.state-service',
+        'pineappleclub.user-service',
+        'pineappleclub.auth-service',
+        'pineappleclub.auth-events-constant'
+    ])
+    .controller('HeaderAdminController', HeaderAdminController);
 
-    HeaderAdminController.$inject = [];
+    HeaderAdminController.$inject = [
+        '$rootScope',
+        'AuthService',
+        'StateService',
+        'UserService',
+        'AUTH_EVENTS'
+    ];
 
-    function HeaderAdminController() {
+    function HeaderAdminController($rootScope, AuthService, StateService,
+        UserService, AUTH_EVENTS) {
+
+        var that = this;
+
+        that.getCurrentUser = UserService.getCurrentUser;
+
+        that.logout = function () {
+            AuthService.logout()
+            .then(function (res) {
+                UserService.setCurrentUser(null);
+
+                $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
+
+                StateService.changeState("signout");
+            });
+        }
     }
 
 }());
-
-//define(
-//    ["app", "constants/auth-events", "services/future-state-service"],
-//    function (app, AUTH_EVENTS) {
-//        "use strict";
-
-//        app.controller("HeaderAdminController",
-//            ["$scope", "$rootScope", "FutureStateService", "AuthService", 
-//            function ($scope, $rootScope, FutureStateService, AuthService) {
-//                $scope.logout = function () {
-//                    AuthService.logout()
-//                    .then(function (res) {
-//                        $scope.setCurrentUser(null);
-
-//                        $rootScope.$broadcast(AUTH_EVENTS.logoutSuccess);
-
-//                        FutureStateService.changeState("signout");
-//                    });
-//                }
-//            }
-//        ]);
-//    });
 (function () {
 
     'use strict';
@@ -223,6 +268,70 @@
     HomeController.$inject = [];
 
     function HomeController() {}
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.login', [
+        'ngCookies',
+        'pineappleclub.auth-service',
+        'pineappleclub.state-service',
+        'pineappleclub.user-service',
+        'pineappleclub.auth-events-constant',
+        'pineappleclub.string-constant'
+    ])
+        .controller('LoginController', LoginController);
+
+    LoginController.$inject = [
+        '$rootScope', 
+        '$cookieStore',
+        'AuthService',
+        'StateService',
+        'UserService',
+        'AUTH_EVENTS',
+        'STRING'
+    ];
+
+    function LoginController($rootScope, $cookieStore, AuthService,
+        StateService, UserService, AUTH_EVENTS, STRING) {
+        
+        var that = this;
+
+        that.credentials = {
+            email: STRING.empty,
+            password: STRING.empty
+        };
+
+        that.errorMessage = null;
+
+        that.login = function (credentials) {
+            AuthService.login(credentials)
+            .then(function (res) {
+                var user = AuthService.getCurrentUser();
+
+                UserService.setCurrentUser(user);
+
+                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+
+                goDashboard();
+            });
+        }
+
+        $rootScope.$on(AUTH_EVENTS.notAuthenticated, function () {
+            that.errorMessage = 'The email or password you entered is incorrect.';
+        });
+
+        if (AuthService.isAuthenticated()) {
+            // use has signed in, redirect to home page
+            goDashboard();
+        }
+
+        function goDashboard() {
+            StateService.changeState('dashboard');
+        }
+    }
 
 }());
 (function () {
@@ -313,6 +422,24 @@
 (function () {
 
     'use strict';
+
+    var AUTH_EVENTS = {
+        loginSuccess: "auth-login-success",
+        loginFailed: "auth-login-failed",
+        logoutSuccess: "auth-logout-success",
+        logoutFailed: "auth-logout-failed",
+        sessionTimeout: "auth-session-timeout",
+        notAuthenticated: "auth-not-authenticated",
+        notAuthorized: "auth-not-authorized"
+    };
+
+    angular.module('pineappleclub.auth-events-constant', [])
+    .constant('AUTH_EVENTS', AUTH_EVENTS);
+
+}());
+(function () {
+
+    'use strict';
     var USER_ROLES, STATES, AUTHORISATION;
 
     USER_ROLES = {
@@ -387,6 +514,32 @@
                             description: "Our location is near Rockdale and Banksia train station."
                         }
                     }
+                },
+                {
+                    name: 'dashboard',
+                    url: '/dashboard',
+                    templateUrl: 'scripts/components/dashboard/dashboard.html',
+                    controller: 'DashboardController as dashboard',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin],
+                        page: {
+                            title: "Admin Dashboard",
+                            description: ""
+                        }
+                    }
+                },
+                {
+                    name: 'login',
+                    url: '/login',
+                    templateUrl: 'scripts/components/login/login.html',
+                    controller: 'LoginController as login',
+                    data: {
+                        authorizedRoles: [USER_ROLES.all],
+                        page: {
+                            title: "Login",
+                            description: "admin user authentication"
+                        }
+                    }
                 }
             ]
     };
@@ -413,6 +566,18 @@
 
     angular.module('pineappleclub.device-sizes-constant', [])
     .constant('DEVICE_SIZES', DEVICE_SIZES);
+
+}());
+(function () {
+
+    'use strict';
+
+    var STRING = {
+        empty: ""
+    };
+
+    angular.module('pineappleclub.string-constant', [])
+    .constant('STRING', STRING);
 
 }());
 (function () {
@@ -555,7 +720,39 @@
 
     'use strict';
 
-    angular.module('pineappleclub.auth-service', [])
+    angular.module('pineappleclub.auth-interceptor-service', [
+        'pineappleclub.auth-events-constant'
+    ])
+    .factory('AuthInterceptor', AuthInterceptor);
+
+    AuthInterceptor.$inject = [
+        "$rootScope",
+        "$q",
+        'AUTH_EVENTS'
+    ];
+
+    function AuthInterceptor($rootScope, $q, AUTH_EVENTS) {
+        return {
+            responseError: function (res) {
+                $rootScope.$broadcast({
+                    401: AUTH_EVENTS.notAuthenticated,
+                    403: AUTH_EVENTS.notAuthorized,
+                    419: AUTH_EVENTS.sessionTimeout,
+                    440: AUTH_EVENTS.sessionTimeout
+                }[res.status], res);
+                return $q.reject(res);
+            }
+        };
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.auth-service', [
+        'ngCookies'
+    ])
     .factory('AuthService', AuthService);
 
     AuthService.$inject = [
@@ -706,6 +903,115 @@
 
 
         return navigator;
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.state-change-service', [
+        'ngProgress',
+        'pineappleclub.state-service',
+        'pineappleclub.auth-service',
+        'pineappleclub.auth-events-constant',
+        'pineappleclub.authorisation-constant'
+    ])
+    .factory('StateChangeService', StateChangeService);
+
+    StateChangeService.$inject = [
+        '$rootScope',
+        'AuthService',
+        'StateService',
+        'AUTH_EVENTS',
+        'AUTHORISATION',
+        'ngProgress'
+    ];
+
+    function StateChangeService($rootScope, AuthService, StateService, 
+        AUTH_EVENTS, AUTHORISATION, ngProgress) {
+
+        var stateChangeService = {
+            change: change
+        };
+
+        return stateChangeService;
+
+        function change(authorizedRoles) {
+
+            if (authorizedRoles[0] === AUTHORISATION.USER_ROLES.all
+                || AuthService.isAuthorized(authorizedRoles)) {
+
+                ngProgress.start();
+
+            } else {
+
+                StateService.changeState('login');
+
+                if (AuthService.isAuthenticated()) {
+                    // user is not allowed
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthorized);
+                } else {
+                    // user is not logged in
+                    $rootScope.$broadcast(AUTH_EVENTS.notAuthenticated);
+                }
+            }
+
+        }
+
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.state-service', [
+        'pineappleclub.authorisation-constant'
+    ])
+    .factory('StateService', StateService);
+
+    StateService.$inject = [
+        '$location',
+        'AUTHORISATION'
+    ];
+
+    function StateService($location, AUTHORISATION) {
+        var stateService = {
+            changeState: changeState
+        };
+
+        return stateService;
+
+        function changeState(name) {
+            var target = _.first(_.where(AUTHORISATION.STATES.states, { name: name }));
+
+            $location.path(target.url)
+        };
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.user-service', [])
+    .factory('UserService', UserService);
+
+    UserService.$inject = [];
+
+    function UserService() {
+        var currentUser,
+            userService = {
+            getCurrentUser: function () {
+                return currentUser;
+            },
+            setCurrentUser: function (user) {
+                currentUser = user;
+            }
+        }
+
+        return userService;
     }
 
 }());
