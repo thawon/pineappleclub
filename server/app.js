@@ -12,7 +12,7 @@
             app = express();
 
         // configuration ===============================================================
-        mongoose.connect(config.db.url); // connect to our database
+        mongoose.connect(config.mongoUrl); // connect to our database
 
         require('./config/passport')(passport); // pass passport for configuration
 
@@ -33,7 +33,7 @@
         app.use(session({
             secret: config.express.secret,
             store: new MongoStore({
-                url: config.db.url
+                mongooseConnection: mongoose.connection
             })
         }));
         // session secret

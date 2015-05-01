@@ -14,9 +14,9 @@
 		"jade": "~1.7.0",
 		"passport": "x.x.x",
 		"passport-local": "x.x.x",
-		"mongodb": "x.x.x",
-		"mongoose": "x.x.x",
-		"connect-mongo":"x.x.x",
+		"mongodb": "latest",
+		"mongoose": "latest",
+		"connect-mongo":"latest",
 		"requirejs": "~2.1.15",
 		"bcrypt-nodejs" : "latest",
 		"underscore" : "~1.7.0"

@@ -29,6 +29,9 @@
             sharedLibPath: config.basePath + '/shared-lib'
         };
 
+        // production connection string
+        mongoUrl = 'mongodb://pineappleclub:CB_FhmudQikwCHn6eK.e3NShH6dvjC_gCpbIMllNJBw-@ds060977.mongolab.com:60977/pineappleclub';
+
         if (!process.env.NODE_ENV) {
 
             // development connection string
@@ -39,18 +42,11 @@
             // e2e connection string
             mongoUrl = 'mongodb://localhost:27017/pineappleclub_test';
 
-        } else {
-
-            // production connection string
-            'mongodb://pineappleclub:CB_FhmudQikwCHn6eK.e3NShH6dvjC_gCpbIMllNJBw-@ds060977.mongolab.com:60977/pineappleclub';
         }
 
         console.log('mongo url: ' + mongoUrl);
-        
-        config.db = {
-            database: 'pineappleclub',
-            url: mongoUrl
-        };
+
+        config.mongoUrl = mongoUrl;
 
         return config;
     });
