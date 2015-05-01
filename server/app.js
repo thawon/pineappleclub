@@ -33,7 +33,7 @@
         app.use(session({
             secret: config.express.secret,
             store: new MongoStore({
-                url: config.mongoUrl
+                mongooseConnection: mongoose.connection
             })
         }));
         // session secret
