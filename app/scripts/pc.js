@@ -540,6 +540,18 @@
                             description: "admin user authentication"
                         }
                     }
+                },
+                {
+                    name: 'signout',
+                    url: '/signout',
+                    templateUrl: 'scripts/components/signout/signout.html',
+                    data: {
+                        authorizedRoles: [USER_ROLES.all],
+                        page: {
+                            title: "Signout",
+                            description: "User is signed out"
+                        }
+                    }
                 }
             ]
     };
@@ -810,7 +822,6 @@
             return $http.post('/authenticated')
                 .then(function (res) {
                     var data = res.data;
-
                     if (data.success) {
                         setCurrentUser(data.user.local);
                     }
