@@ -1,90 +1,84 @@
 ﻿'use strict';
 
 describe('permission', function () {
-    var Mocks = require('./httpBackendMock.js');
+    var httpBackendMock = require('./httpBackendMock.js');
 
     beforeEach(function () {
         browser.get('/');
     });
 
-    //it('admin-pages are not accessible without user authentication', function () {
+    it('admin-pages are not accessible without user authentication', function () {
+                
+        httpBackendMock.add([
+            {
+                method: 'POST',
+                url: '/authenticated',
+                header: 200,
+                response: {
+                    success: false
+                }
+            }
+        ]);
 
-    //    var config;
+        browser.get('/dashboard');
 
-    //    config = {
-    //        method: 'POST',
-    //        url: '/authenticated',
-    //        header: 200,
-    //        response: {
-    //            success: false
-    //        }
-    //    };
+        expect(browser.getCurrentUrl()).toContain('login');
+    });
 
-    //    browser.addMockModule('httpBackendMock', Mocks.httpBackendMock, config);
-
-    //    browser.get('/dashboard');
-
-    //    expect(browser.getCurrentUrl()).toContain('login');
-    //});
-
-    //it('admin-pages are accessible when user is authenticated', function () {        
+    it('admin-pages are accessible when user is authenticated', function () {        
         
-    //    var config;
+        httpBackendMock.add([
+           {
+               method: 'POST',
+               url: '/authenticated',
+               header: 200,
+               response: {
+                   success: true,
+                   user: {
+                       local: {
+                           email: 'email@valid.com',
+                           firstname: 'firstname_valid',
+                           lastname: 'lastname_valid',
+                           userRole: 'admin'
+                       }
+                   }
+               }
+           }
+        ]);
 
-    //    config = {
-    //        method: 'POST',
-    //        url: '/authenticated',
-    //        header: 200,
-    //        response: {
-    //            success: true,
-    //            user: {
-    //                local: {
-    //                    email: 'email@valid.com',
-    //                    firstname: 'firstname_valid',
-    //                    lastname:'lastname_valid',
-    //                    userRole: 'admin'                                
-    //                }
-    //            }
-    //        }
-    //    };
+        browser.get('/dashboard');
 
-    //    browser.addMockModule('httpBackendMock', Mocks.httpBackendMock, config);
-
-    //    browser.get('/dashboard');
-
-    //    expect(browser.getCurrentUrl()).toContain('dashboard');
-    //});
+        expect(browser.getCurrentUrl()).toContain('dashboard');
+    });
 
     it('admin-pages are accessible after user logins', function () {
-
-        var authenticatedMock = function () {
-            angular.module('authenticatedMock', ['ngMockE2E'])
-                .run(function ($httpBackend) {
-                    $httpBackend.whenPOST(/authenticated/).respond(200, { success: false });
-                });
-        };
-
-        var loginMock = function () {
-            angular.module('loginMock', ['ngMockE2E'])
-                .run(function ($httpBackend) {
-                    var response = {
-                        success: true,
-                        user: {
-                            local: {
-                                email: 'email@valid.com',
-                                firstname: 'firstname_valid',
-                                lastname: 'lastname_valid',
-                                userRole: 'admin'
-                            }
+        
+        httpBackendMock.add([
+            {
+                method: 'POST',
+                url: '/authenticated',
+                header: 200,
+                response: {
+                    success: false
+                }
+            },
+            {
+                method: 'POST',
+                url: '/login',
+                header: 200,
+                response: {
+                    success: true,
+                    user: {
+                        local: {
+                            email: 'email@valid.com',
+                            firstname: 'firstname_valid',
+                            lastname: 'lastname_valid',
+                            userRole: 'admin'
                         }
-                    };
-
-                    $httpBackend.whenPOST(/login/).respond(200, response);
-                });
-        };
-
-        browser.addMockModule('authenticatedMock', authenticatedMock);
-        browser.addMockModule('loginMock', loginMock);
+                    }
+                }
+            }
+        ]);
 
         browser.get('/login');
 
@@ -93,7 +87,5 @@ describe('permission', function () {
         element(by.css('.btn')).click();
         
         expect(browser.getCurrentUrl()).toContain('dashboard');
-
-        browser.sleep(30000);
     });
 });
