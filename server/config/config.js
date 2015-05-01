@@ -46,8 +46,11 @@
         }
 
         console.log('mongo url: ' + mongoUrl);
-
-        config.mongoUrl = mongoUrl;
+        
+        config.db = {
+            database: 'pineappleclub',
+            url: mongoUrl
+        };
 
         return config;
     });
