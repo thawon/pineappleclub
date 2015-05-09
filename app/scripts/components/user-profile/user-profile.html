@@ -1,0 +1,62 @@
+﻿<div class="container">
+        
+    <h2>Profile</h2>
+
+    <pcd-expandable-container data-header="Personal Details">
+        <pcd-entity-detail-container update-fn="userProfile.updateFn()">
+            <div data-detail default data-mode="show">
+                <table class="table-views">
+                    <thead>
+                        <tr class="table-views-thead-tr">
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label-inline">First Name:</td>
+                            <td class="label-inline"></td>
+                        </tr>
+                        <tr>
+                            <td class="label-inline">Last Name:</td>
+                            <td class="label-inline"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div data-detail data-mode="edit">
+                <div>
+                    <label class="label-block">First Name</label>
+                    <input type="text" ng-model="userProfile.user.firstname" class="input-text-default">
+                    <label class="label-block">Last Name</label>
+                    <input type="text" ng-model="userProfile.user.lastname" class="input-text-default">
+                </div>
+            </div>
+        </pcd-entity-detail-container>
+    </pcd-expandable-container>
+        
+    <pcd-expandable-container data-header="Login">
+        <pcd-entity-detail-container update-fn="userProfile.updateFnB()">
+            <div data-detail default data-mode="show">
+                <table class="table-views">
+                    <thead>
+                        <tr>
+                            <th class="table-views-thead-tr"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label-inline">Email:</td>
+                            <td class="label-inline"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div data-detail data-mode="edit">
+                <div>
+                    <label class="label-block">Email</label>
+                    <input type="text" class="input-text-default">
+                </div>
+            </div>
+        </pcd-entity-detail-container>
+    </pcd-expandable-container>
+</div>

@@ -4,6 +4,7 @@
 
     angular.module('pineappleclub', [
         'ui.router',
+        'breeze.angular',
         'ngResource',
         'ngProgress',
         'ngCookies',
@@ -18,6 +19,7 @@
         'pineappleclub.side-bar',
         'pineappleclub.dashboard',
         'pineappleclub.login',
+        'pineappleclub.user-profile',
         'pineappleclub.authorisation-constant',
         'pineappleclub.state-change-service',
         'pineappleclub.auth-interceptor-service'
@@ -30,7 +32,7 @@
         $locationProvider.html5Mode({
             enabled: true
         });
-
+        
         $urlRouterProvider.otherwise(AUTHORISATION.STATES.otherwise);
 
         AUTHORISATION.STATES.states.map(function (state) {

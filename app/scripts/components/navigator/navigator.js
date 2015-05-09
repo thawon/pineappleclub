@@ -18,7 +18,7 @@
         this.companyInfo = AppConfigurationService.companyInfo;
         this.menu = NavigatorService.pages.main;
         
-        this.toggleSideBar = function() {
+        this.toggleSideBar = function () {            
             $('.row-offcanvas').toggleClass('active');
         }
     }

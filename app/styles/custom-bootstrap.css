@@ -6169,6 +6169,19 @@ button.close {
 .list-no-padding-left {
   padding-left: 0px;
 }
+.input-text-default {
+  width: 100%;
+  max-width: 250px;
+  margin-bottom: 10px;
+  color: #808080;
+}
+.table-views {
+  border-collapse: separate;
+  border-spacing: 0.5em;
+}
+.table-views-thead-tr > th {
+  width: 90px;
+}
 .side-bar-show {
   display: block;
 }

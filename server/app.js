@@ -1,14 +1,14 @@
 ﻿define(
-    ["config/config"],
-    function (config) {
-        var express = require("express"),
-            bodyParser = require("body-parser"),
-            cookieParser = require("cookie-parser"),
-            methodOverride = require("method-override"),
-            session = require("express-session"),
-            mongoose = require("mongoose"),
-            passport = require("passport"),
-            MongoStore = require("connect-mongo")(session),
+    ['config/config', 'util/dev-script-builder'],
+    function (config, builder) {
+        var express = require('express'),
+            bodyParser = require('body-parser'),
+            cookieParser = require('cookie-parser'),
+            methodOverride = require('method-override'),
+            session = require('express-session'),
+            mongoose = require('mongoose'),
+            passport = require('passport'),
+            MongoStore = require('connect-mongo')(session),
             app = express();
 
         // configuration ===============================================================
@@ -23,11 +23,15 @@
         app.use(bodyParser());
 
         app.engine(config.express.view.engine.type, config.express.view.engine.driver);
-        app.set("view engine", config.express.view.engine.type);
-        app.set("views", config.express.view.path);
+        app.set('view engine', config.express.view.engine.type);
+        app.set('views', config.express.view.path);
 
         app.use(express.static(config.express.staticPath));
-        app.use("/shared-lib", express.static(config.express.sharedLibPath));
+
+        // enable ALL CORS requests
+        //app.use(require('cors')()); 
+
+        app.use('/shared-lib', express.static(config.express.sharedLibPath));
 
         // required for passport
         app.use(session({
@@ -43,10 +47,10 @@
 
         // routes ======================================================================
         // load our routes and pass in our app and fully configured passport
-        require("routes/index")(app, passport);
+        require('routes/index')(app, passport, mongoose);
 
         app.listen(config.express.port, function (req, res) {
-            console.log("express is listening on http://" +
-              config.express.ip + ":" + config.express.port);
+            console.log('express is listening on http://' +
+              config.express.ip + ':' + config.express.port);
         });
     });

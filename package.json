@@ -16,10 +16,12 @@
 		"passport-local": "~1.0.0",
 		"mongodb": "~2.0.28",
 		"mongoose": "~4.0.2",
+		"breeze-mongodb": "~0.0.6",
 		"connect-mongo":"~0.8.1",
 		"requirejs": "~2.1.15",
 		"bcrypt-nodejs" : "~0.0.3",
-		"underscore" : "~1.7.0"
+		"underscore" : "~1.7.0",
+		"cors": "^2.2.0"
 	},
 	"devDependencies": {
 		"karma": "~0.12.23",

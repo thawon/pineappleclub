@@ -26,16 +26,16 @@
         return authService;
 
         function setCurrentUser(user) {
-            $cookieStore.put('user', user);
+            localStorage.setItem('user', JSON.stringify(user));
         }
 
         function login(credentials) {
-            return $http.post('/login', credentials)
+            return $http.post('/api/login', credentials)
                 .then(function (res) {
                     var data = res.data;
 
                     if (data.success) {
-                        setCurrentUser(data.user.local);
+                        setCurrentUser(data.user);
                     }
 
                     return data;
@@ -43,12 +43,12 @@
         };
 
         function logout() {
-            return $http.post('/logout')
+            return $http.post('/api/logout')
                 .then(function (res) {
                     var data = res.data;
 
                     if (data.success) {
-                        $cookieStore.remove('user');
+                        localStorage.removeItem('user');
                     }
 
                     return data;
@@ -57,13 +57,13 @@
 
         function authenticated() {
 
-            $cookieStore.remove('user');
+            localStorage.removeItem('user');
 
-            return $http.post('/authenticated')
+            return $http.post('/api/authenticated')
                 .then(function (res) {
                     var data = res.data;
                     if (data.success) {
-                        setCurrentUser(data.user.local);
+                        setCurrentUser(data.user);
                     }
 
                     return data;
@@ -86,9 +86,9 @@
         };
 
         function getCurrentUser() {
-            var user = $cookieStore.get('user');
+            var user = localStorage.getItem('user');
 
-            return (user) ? user : null;
+            return (user) ? JSON.parse(user) : null;
         }
 
     }

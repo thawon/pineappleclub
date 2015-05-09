@@ -25,7 +25,8 @@ module.exports = function (grunt) {
                     livereload: true
                 },
                 files:
-                [                    
+                [
+                    "./app/lesses/*.less",
                     "./app/scripts/components/**/*.less"
                 ],
                 tasks: ["less"]

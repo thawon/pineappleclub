@@ -113,6 +113,19 @@
                             description: "User is signed out"
                         }
                     }
+                },
+                {
+                    name: 'user-profile',
+                    url: '/user-profile',
+                    templateUrl: 'scripts/components/user-profile/user-profile.html',
+                    controller: 'UserProfileController as userProfile',
+                    data: {
+                        authorizedRoles: [USER_ROLES.all],
+                        page: {
+                            title: "User Profile Details",
+                            description: "View/Edit user profile"
+                        }
+                    }
                 }
             ]
     };
