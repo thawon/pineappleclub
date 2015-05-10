@@ -158,4 +158,7 @@ module.exports = function (grunt) {
     // Note: web driver must be started manually prior to running. "webdriver-manager start"
     grunt.registerTask("test", "run specs, launch webserver in test mode then run e2e on minified file",
     ["ngAnnotate", "uglify", "karma:unit", "parallel:test"]);
+
+    grunt.registerTask("mini", "minifying with running test",
+    ["ngAnnotate", "uglify"]);
 };
