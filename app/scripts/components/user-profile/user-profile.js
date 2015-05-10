@@ -20,6 +20,7 @@
         UserService.getUsers()
             .then(function (user) {
                 that.user = user;
+                user.fullname;
             });
 
         that.updateFn = function () {

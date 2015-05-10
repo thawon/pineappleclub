@@ -1,36 +1,40 @@
 ﻿(function () {
 
-    'use strict';
+    'use strict';    
 
     angular.module('pineappleclub.auth-service', [
-        'ngCookies'
+        'pineappleclub.cookie-service',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('AuthService', AuthService);
 
     AuthService.$inject = [
-        '$cookieStore',
-        '$http'
+        // Cookie Service is used instead of $cookieStore because it does not work after load the breezejs library        
+        'CookieService',
+        '$http',
+        'AppConfigurationService'
     ];
 
-    function AuthService($cookieStore, $http) {
+    function AuthService(CookieService, $http, AppConfigurationService) {
 
         var authService = {
-            login: login,
-            logout: logout,
-            authenticated: authenticated,
-            isAuthenticated: isAuthenticated,
-            isAuthorized: isAuthorized,
-            getCurrentUser: getCurrentUser
-        };
+                login: login,
+                logout: logout,
+                authenticated: authenticated,
+                isAuthenticated: isAuthenticated,
+                isAuthorized: isAuthorized,
+                getCurrentUser: getCurrentUser
+            },
+            serviceName = AppConfigurationService.getServiceName;
 
         return authService;
-
+        
         function setCurrentUser(user) {
-            localStorage.setItem('user', JSON.stringify(user));
+            CookieService.setCookie('user', user);
         }
 
         function login(credentials) {
-            return $http.post('/api/login', credentials)
+            return $http.post(serviceName('/login'), credentials)
                 .then(function (res) {
                     var data = res.data;
 
@@ -43,12 +47,12 @@
         };
 
         function logout() {
-            return $http.post('/api/logout')
+            return $http.post(serviceName('/logout'))
                 .then(function (res) {
                     var data = res.data;
 
-                    if (data.success) {
-                        localStorage.removeItem('user');
+                    if (data.success) {                        
+                        CookieService.removeCookie('user');
                     }
 
                     return data;
@@ -57,9 +61,9 @@
 
         function authenticated() {
 
-            localStorage.removeItem('user');
-
-            return $http.post('/api/authenticated')
+            CookieService.removeCookie('user');
+            
+            return $http.post(serviceName('/authenticated'))
                 .then(function (res) {
                     var data = res.data;
                     if (data.success) {
@@ -86,9 +90,7 @@
         };
 
         function getCurrentUser() {
-            var user = localStorage.getItem('user');
-
-            return (user) ? JSON.parse(user) : null;
+            return CookieService.getCookie('user');
         }
 
     }

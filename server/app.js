@@ -1,6 +1,6 @@
 ﻿define(
-    ['config/config', 'util/dev-script-builder'],
-    function (config, builder) {
+    ['config/config', 'dataService/database'],
+    function (config, database) {
         var express = require('express'),
             bodyParser = require('body-parser'),
             cookieParser = require('cookie-parser'),
@@ -9,31 +9,10 @@
             mongoose = require('mongoose'),
             passport = require('passport'),
             MongoStore = require('connect-mongo')(session),
-            MongoClient = require('mongodb').MongoClient,
             app = express();
 
         // configuration ===============================================================
         mongoose.connect(config.mongoUrl); // connect to our database
-
-        MongoClient.connect(config.mongoUrl, { server: {auto_reconnect: true} },function (err, db) {
-            console.log("Connected correctly to server");
-
-            // required for passport
-            app.use(session({
-                secret: config.express.secret,
-                store: new MongoStore({
-                    db: db
-                })
-            }));
-            // session secret
-            app.use(passport.initialize());
-            // persistent login sessions
-            app.use(passport.session());
-
-            // routes ======================================================================
-            // load our routes and pass in our app and fully configured passport
-            require('routes/index')(app, passport, mongoose);
-        });
 
         require('./config/passport')(passport); // pass passport for configuration
 
@@ -49,12 +28,25 @@
 
         app.use(express.static(config.express.staticPath));
 
-        // enable ALL CORS requests
-        //app.use(require('cors')()); 
-
         app.use('/shared-lib', express.static(config.express.sharedLibPath));
 
-        
+        database.start(function (db) {
+            // required for passport
+            app.use(session({
+                secret: config.express.secret,
+                store: new MongoStore({
+                    db: db
+                })
+            }));
+            // session secret
+            app.use(passport.initialize());
+            // persistent login sessions
+            app.use(passport.session());
+
+            // routes ======================================================================
+            // load our routes and pass in our app and fully configured passport
+            require('routes/index')(app, passport);
+        });
 
         app.listen(config.express.port, function (req, res) {
             console.log('express is listening on http://' +

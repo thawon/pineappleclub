@@ -1,41 +1,21 @@
 ﻿define(
-    ['express', 'models/user'],
-    function (express, User) {
+    ['express', 'dataService/database', 'breeze-mongodb'],
+    function (express, database, bmongo) {
+        var router = express.Router();
 
-        return function (mongoose) {
-            var router = express.Router(),
-                bmongo = require('breeze-mongodb');
+        router.get('/User', getUser);
 
-            router.get('/User', getUser);
+        return router;
 
-            router.post('/SaveChanges', saveChanges);
+        function getUser(req, res, next) {
+            var query = new bmongo.MongoQuery(req.query);
 
-            return router;
-
-            function getUser(req, res, next) {                
-                var id = req.query.$filter.split(" ")[2].replace("'", '').replace("'", '');
-
-                User.findById(id, function (err, user) {
-                    // if there are any errors, return the error before anything else
+            query.execute(database.db, 'Users',
+                function (err, results) {
                     if (err)
                         res.send(err);
 
-                    res.send(user);
+                    res.send(results);
                 });
-
-                //query.execute(mongoose.connection, 'User',
-                //    function (error) {
-                //        var x;
-                //        x = 1;
-                //    });
-            }
-
-            function saveChanges(req, res, next) {
-                data.saveChanges(req.body, function (res, next) {
-                    var x;
-                    x = 1;
-                });
-            }
         }
-
     });

@@ -10,17 +10,20 @@
     'use strict';
 
     angular.module('pineappleclub.entity-manager-factory', [
-        'pineappleclub.model'
+        'pineappleclub.model',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('EntityManagerFactory', EntityManagerFactory);
 
     EntityManagerFactory.$inject = [
         'breeze',
-        'model'
+        'model',
+        'AppConfigurationService'
     ];
 
-    function EntityManagerFactory(breeze, model) {
-        var dataService, masterManager, metadataStore, service;
+    function EntityManagerFactory(breeze, model, AppConfigurationService) {
+        var dataService, masterManager, metadataStore, service,
+            config = AppConfigurationService.breezejs;
 
         configureBreezeForThisApp();
         metadataStore = getMetadataStore();
@@ -35,7 +38,7 @@
         function configureBreezeForThisApp() {
             breeze.config.initializeAdapterInstance('dataService', 'mongo', true);
             initBreezeAjaxAdapter('0');
-            dataService = new breeze.DataService({ serviceName: 'api' })
+            dataService = new breeze.DataService({ serviceName: AppConfigurationService.getServiceName('') })
         }
 
         // get the 'master manager', creating it if necessary
@@ -58,7 +61,7 @@
                 headers: {
                     'X-UserSessionId': userSessionId
                 },
-                timeout: 10000
+                timeout: config.httpTimeout
             };
         }
 

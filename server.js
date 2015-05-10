@@ -9,6 +9,8 @@ requirejs.config({
     paths: {
         app: "server/app",
 
+        dataService: "server/data-service",
+
         config: "server/config",
 
         models: "server/models",

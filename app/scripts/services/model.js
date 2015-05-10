@@ -15,27 +15,25 @@
     'use strict';
 
     angular.module('pineappleclub.model', [
-        'pineappleclub.meta-data'
+        'pineappleclub.meta-data',
+        'pineappleclub.user-model'
     ])
     .factory('model', factory);
 
     factory.$inject = [
         'breeze',
-        'metadata'
+        'metadata',
+        'UserModelService'
     ];
 
-    function factory(breeze, metadata) {
+    function factory(breeze, metadata, UserModelService) {
+
         var model = {
-            getMetadataStore: getMetadataStore,
-            User: User
+            getMetadataStore: getMetadataStore
         };
 
         return model;
-
-        /////////////////////
-        // Model classes
-        function User() { }
-
+        
         // Fill metadataStore with metadata, then enrich the types
         // with add/remove methods, property aliases, and sub-document navigation properties
         // that can't be represented (yet) in Breeze metadata.
@@ -54,7 +52,9 @@
             ///////////////////////////////
 
             function registerUser() {
-                registerType('User', User);
+                var User = UserModelService.model;
+
+                registerType('User', UserModelService.model);
             }
                         
         }

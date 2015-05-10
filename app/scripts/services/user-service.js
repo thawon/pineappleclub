@@ -33,7 +33,7 @@
             //var users = manager.getEntities('User');
 
             return breeze.EntityQuery.from('User')
-                    .where('id', 'eq', '54603b40496fba9c2301f5db')
+                    .where('id', 'eq', '554f16df58bec36013467c9c')
                     //.orderBy('firstname desc')
                     .using(manager).execute()
                     .then(function (data) {

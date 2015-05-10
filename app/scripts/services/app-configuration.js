@@ -30,10 +30,18 @@
             },
             progress: {
                 color: '#1d9ad9'
+            },
+            getServiceName: getServiceName,
+            breezejs: {
+                httpTimeout: 10000
             }
         };
 
         return configuration;
+
+        function getServiceName(endpoint) {
+            return 'api' + endpoint
+        }
     }
 
 }());

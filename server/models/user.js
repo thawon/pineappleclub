@@ -11,7 +11,7 @@
             lastLoggedInDateTime: Date,
             firstname: String,
             lastname: String
-        });
+        }, { collection: 'Users' });
 
         // methods ======================
         // generating a hash
