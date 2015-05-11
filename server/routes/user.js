@@ -3,7 +3,7 @@
     function (express, database, bmongo) {
         var router = express.Router();
 
-        router.get('/User', getUser);
+        router.get('/Users', getUser);
 
         return router;
 

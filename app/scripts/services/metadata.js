@@ -6,14 +6,17 @@
 (function() {
     'use strict';
 
-    angular.module("pineappleclub.meta-data", [])
+    angular.module("pineappleclub.meta-data", [
+        'pineappleclub.user-model'
+    ])
     .factory('metadata', Metadata);
 
     Metadata.$inject = [
-        'breeze'
+        'breeze',
+        'UserModelService'
     ];
 
-    function Metadata(breeze) {
+    function Metadata(breeze, UserModelService) {
         return {
             createMetadataStore: createMetadataStore
         };
@@ -24,7 +27,7 @@
 
             var store = new breeze.MetadataStore({ namingConvention: namingConvention });
 
-            fillMetadataStore(store);
+            fillMetadataStore(store, UserModelService);
 
             return store;
         }
@@ -48,7 +51,7 @@
             return convention;
         }
 
-        function fillMetadataStore(store) {
+        function fillMetadataStore(store, UserModelService) {
             // Using Breeze Labs: breeze.metadata.helper.js
             // https://github.com/IdeaBlade/Breeze/blob/master/Breeze.Client/Scripts/Labs/breeze.metadata-helper.js
             // The helper reduces data entry by applying common conventions
@@ -66,27 +69,8 @@
 
             // addType - make it easy to add the type to the store using the helper
             var addType = function (type) { helper.addTypeToStore(store, type); };
-
-            // DataTypes
-            var DT = breeze.DataType;
-            var BOOL = DT.Boolean;
-            var DATE = DT.DateTime;
-            var DECIMAL = DT.Decimal;
-            var LUID = DT.Int32; // "Lookup" Id
-            var ID = DT.MongoObjectId; // Root entity Id
-
-            addUser();
-
-            function addUser() {
-                addType({
-                    name: 'User',
-                    dataProperties: {
-                        id: { type: ID },
-                        firstname: { max: 100 },
-                        lastname: { max: 100 }
-                    }
-                });
-            }
+            
+            addType(UserModelService.getType());
 
         }
     }
