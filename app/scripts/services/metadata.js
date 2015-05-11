@@ -12,11 +12,10 @@
     .factory('metadata', Metadata);
 
     Metadata.$inject = [
-        'breeze',
         'UserModelService'
     ];
 
-    function Metadata(breeze, UserModelService) {
+    function Metadata(UserModelService) {
         return {
             createMetadataStore: createMetadataStore
         };

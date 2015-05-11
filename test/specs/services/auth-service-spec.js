@@ -1,14 +1,22 @@
 ﻿describe('Unit: AuthService', function () {
 
-    var service, $cookieStore, $httpBackend, AUTHORISATION, USER_ROLES;
+    var service, $httpBackend, AUTHORISATION, USER_ROLES, cookieServiceMock;
 
-    beforeEach(module('ngCookies', 'pineappleclub.authorisation-constant', 'pineappleclub.auth-service'));    
+    beforeEach(module('pineappleclub.authorisation-constant', 'pineappleclub.auth-service',
+    function ($provide) {
+        cookieServiceMock = {
+            getCookie: function (name) { },
+            setCookie: function (name, cookie) { },
+            removeCookie: function (name) { }
+        }
 
-    beforeEach(inject(function (AuthService, _$cookieStore_, _$httpBackend_, AUTHORISATION) {
+        $provide.value('CookieService', cookieServiceMock);
+    }));
+
+    beforeEach(inject(function (AuthService, _$httpBackend_, AUTHORISATION) {
         service = AuthService;
         USER_ROLES = AUTHORISATION.USER_ROLES;
 
-        $cookieStore = _$cookieStore_;
         $httpBackend = _$httpBackend_;
     }));
 
@@ -23,48 +31,46 @@
                 password: credentials.password,
                 userRole: 'admin'
             },
-            url = '/login';
+            url = 'api/login';
 
         $httpBackend.when('POST', url)
             .respond({
                 success: true,
-                user: {
-                    local: user
-                }
+                user: user
             });
 
-        spyOn($cookieStore, 'put');
+        spyOn(cookieServiceMock, 'setCookie');
 
         service.login(credentials, function () { });
 
         $httpBackend.flush();
 
         $httpBackend.expectPOST(url);
-        expect($cookieStore.put).toHaveBeenCalledWith('user', user);
+        expect(cookieServiceMock.setCookie).toHaveBeenCalledWith('user', user);
     });
 
     it('user logout',
     function () {
-        var url = '/logout';
+        var url = 'api/logout';
 
         $httpBackend.when('POST', url)
             .respond({
                 success: true
             });
 
-        spyOn($cookieStore, 'remove');
+        spyOn(cookieServiceMock, 'removeCookie');
 
         service.logout(function () { });
 
         $httpBackend.flush();
 
         $httpBackend.expectPOST(url);
-        expect($cookieStore.remove).toHaveBeenCalledWith('user');
+        expect(cookieServiceMock.removeCookie).toHaveBeenCalledWith('user');
     });
 
     it('user is authenticated, checking authentication',
     function () {
-        spyOn($cookieStore, 'get').andCallFake(function () {
+        spyOn(cookieServiceMock, 'getCookie').andCallFake(function () {
             return {
                 email: 'tester@unittest.com.au',
                 password: 'password'
@@ -76,7 +82,7 @@
 
     it('user is not authenticated, checking authentication',
     function () {
-        spyOn($cookieStore, 'get').andCallFake(function () {
+        spyOn(cookieServiceMock, 'getCookie').andCallFake(function () {
             return null;
         });
 
@@ -85,18 +91,18 @@
 
     it('get current authenticated user',
     function () {
-        spyOn($cookieStore, 'get');
+        spyOn(cookieServiceMock, 'getCookie');
 
         service.getCurrentUser();
 
-        expect($cookieStore.get).toHaveBeenCalledWith('user');
+        expect(cookieServiceMock.getCookie).toHaveBeenCalledWith('user');
     });
 
     it('admin user accesses url which requires admin permission',
     function () {
         var authorizedRoles = [USER_ROLES.admin];
 
-        spyOn($cookieStore, 'get').andCallFake(function () {
+        spyOn(cookieServiceMock, 'getCookie').andCallFake(function () {
             return {
                 email: 'tester@unittest.com.au',
                 password: 'password',
@@ -111,7 +117,7 @@
     function () {
         var authorizedRoles = [USER_ROLES.admin];
 
-        spyOn($cookieStore, 'get').andCallFake(function () {
+        spyOn(cookieServiceMock, 'getCookie').andCallFake(function () {
             return {
                 email: 'tester@unittest.com.au',
                 password: 'password',

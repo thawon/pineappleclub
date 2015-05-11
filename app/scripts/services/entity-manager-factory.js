@@ -16,12 +16,11 @@
     .factory('EntityManagerFactory', EntityManagerFactory);
 
     EntityManagerFactory.$inject = [
-        'breeze',
         'model',
         'AppConfigurationService'
     ];
 
-    function EntityManagerFactory(breeze, model, AppConfigurationService) {
+    function EntityManagerFactory(model, AppConfigurationService) {
         var dataService, masterManager, metadataStore, service,
             config = AppConfigurationService.breezejs;
 

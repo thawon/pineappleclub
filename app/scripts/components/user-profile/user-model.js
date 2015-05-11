@@ -8,11 +8,10 @@
     .factory('UserModelService', UserModelService);
 
     UserModelService.$inject = [
-        'breeze',
         'UtilService'
     ];
 
-    function UserModelService(breeze, UtilService) {
+    function UserModelService(UtilService) {
         var type = breeze.DataType,
             userModelService = {
                 model: function () { },

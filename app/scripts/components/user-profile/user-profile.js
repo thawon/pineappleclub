@@ -5,27 +5,31 @@
     angular.module('pineappleclub.user-profile', [
         'pineappleclub.entity-detail-container',
         'pineappleclub.expandable-container',
-        'pineappleclub.user-profile-service'
+        'pineappleclub.user-profile-service',
+        'pineappleclub.data-service',
+        'pineappleclub.user-service'
     ])
     .controller('UserProfileController', UserProfileController);
 
     UserProfileController.$inject = [
-        'UserProfileService'
+        'UserProfileService',
+        'DataService',
+        'UserService'
     ];
 
-    function UserProfileController(UserProfileService) {
-        var that = this;
+    function UserProfileController(UserProfileService, DataService, UserService) {
+        var that = this,
+            currentUser = UserService.getCurrentUser();
 
         that.user = null;
 
-        UserProfileService.getUsers()
+        UserProfileService.getUser(currentUser._id)
             .then(function (user) {
                 that.user = user;
-                user.fullname;
             });
 
         that.updateFn = function () {
-            UserProfileService.save();
+            DataService.saveChanges();
         };
 
         that.updateFnB = function () {

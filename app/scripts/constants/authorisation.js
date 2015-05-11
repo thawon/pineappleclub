@@ -120,7 +120,7 @@
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as userProfile',
                     data: {
-                        authorizedRoles: [USER_ROLES.all],
+                        authorizedRoles: [USER_ROLES.admin],
                         page: {
                             title: "User Profile Details",
                             description: "View/Edit user profile"

@@ -8,41 +8,28 @@
     .factory('UserProfileService', UserProfileService);
 
     UserProfileService.$inject = [
-        'EntityManagerFactory'
+        'EntityManagerFactory'        
     ];
 
-    function UserProfileService(EntityManagerFactory) {
+    function UserProfileService(EntityManagerFactory, UserService) {
         var manager = EntityManagerFactory.getManager(),
             userProfileService = {
-                getUsers: getUsers,
-                save: save
+                getUser: getUser
             }
 
         return userProfileService;
 
-        function getUsers() {
-            return manager.fetchEntityByKey('User', '554f16df58bec36013467c9c')
+        function getUser(id) {
+            return manager.fetchEntityByKey('User', id)
                 .then(function (data) {
                     return data.entity;
                 })
                 .catch(function (error) {
-                    var x;
-                    x = 1;
+                    console.log(error)
                 });
 
         }
 
-        function save() {
-            return manager.saveChanges()
-                .then(function (saveResult) {
-                    var x;
-                    x = 1;
-                })
-                .catch(function (error) {
-                    var x;
-                    x = 1;
-                });
-        }
     }
 
 }());

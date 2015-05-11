@@ -21,12 +21,11 @@
     .factory('model', factory);
 
     factory.$inject = [
-        'breeze',
         'metadata',
         'UserModelService'
     ];
 
-    function factory(breeze, metadata, UserModelService) {
+    function factory(metadata, UserModelService) {
 
         var model = {
             getMetadataStore: getMetadataStore
@@ -46,16 +45,9 @@
             // these model types contain extensions to the type definitions from metadata.js
             var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
 
-            registerUser();
+            registerType('User', UserModelService.model);
 
             return metadataStore;
-            ///////////////////////////////
-
-            function registerUser() {
-                var User = UserModelService.model;
-
-                registerType('User', UserModelService.model);
-            }
                         
         }
     }

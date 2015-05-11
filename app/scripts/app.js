@@ -47,8 +47,8 @@
 
         $httpProvider.interceptors.push("AuthInterceptor");
     }])
-    .run(['$rootScope', 'StateChangeService', 'ngProgress',
-    function ($rootScope, StateChangeService, ngProgress) {
+    .run(['breeze', '$rootScope', 'StateChangeService', 'ngProgress',
+    function (breeze, $rootScope, StateChangeService, ngProgress) {
 
         $rootScope.$on("$stateChangeStart", function (event, next) {
             StateChangeService.change(next.data.authorizedRoles);
