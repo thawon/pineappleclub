@@ -17,11 +17,12 @@
         var that = this,
             states, currentUser;
 
-        currentUser = UserService.getCurrentUser();
+        that.currentUser = UserService.getCurrentUser();
 
         states = _.filter(AUTHORISATION.STATES.states,
             function (state) {
-                return (state.data.authorizedRoles.indexOf(currentUser.userRole));
+                return (state.data.authorizedRoles.indexOf(that.currentUser.userRole) !== -1)
+                        && state.name !== 'dashboard';
             });
 
         that.states = states;

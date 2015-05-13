@@ -6,19 +6,22 @@
         'ngProgress',
         'pineappleclub.app-configuration-service',
         'pineappleclub.auth-service',
-        'pineappleclub.user-service'
+        'pineappleclub.user-service',
+        'pineappleclub.auth-events-constant'
     ])
     .controller('ApplicationController', ApplicationController);
 
     ApplicationController.$inject = [
+        '$rootScope',
         'ngProgress',
         'AppConfigurationService',
         'AuthService',
-        'UserService'
+        'UserService',
+        'AUTH_EVENTS'
     ];
 
-    function ApplicationController(ngProgress, AppConfigurationService,
-        AuthService, UserService) {
+    function ApplicationController($rootScope, ngProgress, AppConfigurationService,
+        AuthService, UserService, AUTH_EVENTS) {
 
         var that = this;
 

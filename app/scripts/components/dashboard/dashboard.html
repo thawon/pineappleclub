@@ -1,22 +1,13 @@
 ﻿<!-- ds = "dashboard" -->
-<div ng-controller="DashboardController">
+<div>
     <div id="ds_header_div">
-        Welcome <span>{{currentUser.firstname + ' ' + currentUser.lastname}}</span>
+        Welcome <span>{{dashboard.currentUser.firstname + ' ' + dashboard.currentUser.lastname}}</span>
     </div>
     <div id="hm_items_div" class="container">
-        <div class="col-xs-4 col-sm-3">
+
+        <div ng-repeat="state in dashboard.states" class="col-xs-4 col-sm-3">
             <div class="thumbnail img-responsive tile-size">
-                <img class="tile-image" src="../images/children.png">
-            </div>
-        </div>
-        <div class="col-xs-4 col-sm-3">
-            <div class="thumbnail img-responsive tile-size">
-                <img class="tile-image" src="../images/journal.png">
-            </div>
-        </div>
-        <div class="col-xs-4 col-sm-3">
-            <div class="thumbnail img-responsive tile-size">
-                <img class="tile-image" src="../images/daily.png">
+                <a ui-sref="{{state.name}}"><img class="tile-image" ng-src="{{state.icon}}"><span ng-bind="state.display"></span></a>                
             </div>
         </div>
     </div>

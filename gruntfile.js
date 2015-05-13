@@ -27,6 +27,7 @@ module.exports = function (grunt) {
                 files:
                 [
                     "./app/lesses/*.less",
+                    "./app/scripts/directives/**/*.less",
                     "./app/scripts/components/**/*.less"
                 ],
                 tasks: ["less"]

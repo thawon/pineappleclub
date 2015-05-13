@@ -21,9 +21,9 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Child Care Service",
-                            description: "We provide high quality child care service supported by Integricare." +
-                                            "The service is operated by experienced diploma qualification educator."
+                            title: 'Child Care Service',
+                            description: 'We provide high quality child care service supported by Integricare.' +
+                                            'The service is operated by experienced diploma qualification educator.'
                         }
                     }
                 },
@@ -35,8 +35,8 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Family Day Care, Before/After school care, Vocation care",
-                            description: "We provide Family Day Care, Before/After school care and Vocation care."
+                            title: 'Family Day Care, Before/After school care, Vocation care',
+                            description: 'We provide Family Day Care, Before/After school care and Vocation care.'
                         }
                     }
                 },
@@ -62,8 +62,8 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Playroom, Creative corner, Art and craft and outside playground",
-                            description: "Our facilities are Playroom, Creative corner, Art and craft and outside playground."
+                            title: 'Playroom, Creative corner, Art and craft and outside playground',
+                            description: 'Our facilities are Playroom, Creative corner, Art and craft and outside playground.'
                         }
                     }
                 },
@@ -76,21 +76,22 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Near Rockdale and Banksia train station",
-                            description: "Our location is near Rockdale and Banksia train station."
+                            title: 'Near Rockdale and Banksia train station',
+                            description: 'Our location is near Rockdale and Banksia train station.'
                         }
                     }
                 },
                 {
                     name: 'dashboard',
+                    display: 'Dashboard',
                     url: '/dashboard',
                     templateUrl: 'scripts/components/dashboard/dashboard.html',
                     controller: 'DashboardController as dashboard',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {
-                            title: "Admin Dashboard",
-                            description: ""
+                            title: 'Admin Dashboard',
+                            description: ''
                         }
                     }
                 },
@@ -102,8 +103,8 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Login",
-                            description: "admin user authentication"
+                            title: 'Login',
+                            description: 'admin user authentication'
                         }
                     }
                 },
@@ -114,23 +115,25 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Signout",
-                            description: "User is signed out"
+                            title: 'Signout',
+                            description: 'User is signed out'
                         }
                     }
                 },
                 {
                     name: 'user-profile',
+                    display: 'My Profile',
                     url: '/user-profile',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as userProfile',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {
-                            title: "User Profile Details",
-                            description: "View/Edit user profile"
+                            title: 'User Profile Details',
+                            description: 'View/Edit user profile'
                         }
-                    }
+                    },
+                    icon: '/images/user-profile.png'
                 }
             ]
     };

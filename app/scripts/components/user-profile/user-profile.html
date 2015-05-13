@@ -13,21 +13,21 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="label-inline">First Name:</td>
-                            <td class="label-inline"></td>
+                            <td class="label-input">First name:</td>
+                            <td class="label-input"><span ng-bind="userProfile.user.firstname"></span></td>
                         </tr>
                         <tr>
-                            <td class="label-inline">Last Name:</td>
-                            <td class="label-inline"></td>
+                            <td class="label-input">Last name:</td>
+                            <td class="label-input"><span ng-bind="userProfile.user.lastname"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div data-detail data-mode="edit">
                 <div>
-                    <label class="label-block">First Name</label>
+                    <label class="label-input">First name</label>
                     <input type="text" ng-model="userProfile.user.firstname" class="input-text-default">
-                    <label class="label-block">Last Name</label>
+                    <label class="label-input">Last name</label>
                     <input type="text" ng-model="userProfile.user.lastname" class="input-text-default">
                 </div>
             </div>

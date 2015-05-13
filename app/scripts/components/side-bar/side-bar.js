@@ -4,17 +4,24 @@
 
     angular.module('pineappleclub.side-bar', [
         'pineappleclub.device-height-directive',
-        'pineappleclub.app-configuration-service',        
-        'pineappleclub.authorisation-constant'
+        'pineappleclub.app-configuration-service',
+        'pineappleclub.auth-service',
+        'pineappleclub.authorisation-constant',
+        'pineappleclub.auth-events-constant'
     ])
     .controller('SideBarController', SideBarController);
 
     SideBarController.$inject = [
+        '$rootScope',
         'AppConfigurationService',
-        'AUTHORISATION'
+        'AuthService',
+        'AUTHORISATION',
+        'AUTH_EVENTS'
     ];
 
-    function SideBarController(AppConfigurationService, AUTHORISATION) {
+    function SideBarController($rootScope, AppConfigurationService, AuthService,
+        AUTHORISATION, AUTH_EVENTS) {
+
         var that = this,
             states;
 
@@ -34,13 +41,31 @@
                     || state.name === 'contact';
             });
 
+        that.dashboardState = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'dashboard'
+            })[0];
+
         that.project = AppConfigurationService.companyInfo;
         that.states = states;
+        that.isShownDashboard = AuthService.isAuthenticated();
         that.toggleSideBar = $.proxy(toggleSideBar, that);
+
+        $rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
+            that.isShownDashboard = true;
+        });
+
+        $rootScope.$on(AUTH_EVENTS.authenticated, function () {
+            that.isShownDashboard = true;
+        });
+
+        $rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
+            that.isShownDashboard = false;
+        });
 
         function toggleSideBar() {
             $(that.configs.ELE_SIDEBAR).toggleClass(that.configs.CONS_ACTIVE);
-        }
+        }        
     }
 
 }());
