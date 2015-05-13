@@ -14,6 +14,7 @@
             [
                 {
                     name: 'home',
+                    display: 'Home',
                     url: '/',
                     templateUrl: 'scripts/components/home/home.html',
                     controller: 'HomeController as home',
@@ -28,6 +29,7 @@
                 },
                 {
                     name: 'services',
+                    display: 'Services',
                     url: '/services',
                     templateUrl: 'scripts/components/services/services.html',
                     data: {
@@ -40,6 +42,7 @@
                 },
                 {
                     name: 'philosophy',
+                    display: 'Philosophy',
                     url: '/philosophy',
                     templateUrl: 'scripts/components/philosophy/philosophy.html',
                     data: {
@@ -52,6 +55,7 @@
                 },
                 {
                     name: 'photos',
+                    display: 'Photos',
                     url: '/photos',
                     templateUrl: 'scripts/components/photos/photos.html',
                     controller: 'PhotosController as photos',
@@ -65,6 +69,7 @@
                 },
                 {
                     name: 'contact',
+                    display: 'Contact',
                     url: '/contact',
                     templateUrl: 'scripts/components/contact/contact.html',
                     controller: 'ContactController as contact',

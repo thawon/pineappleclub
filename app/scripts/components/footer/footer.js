@@ -3,19 +3,26 @@
     'use strict';
 
     angular.module('pineappleclub.footer', [
-        'pineappleclub.navigator-service'
+        'pineappleclub.authorisation-constant'
     ])
     .controller('FooterController', FooterController);
 
     FooterController.$inject = [
-        'NavigatorService'
+        'AUTHORISATION'
     ];
 
-    function FooterController(NavigatorService) {
-        var that = this;
+    function FooterController(AUTHORISATION) {
+        var that = this,
+            states;
 
-        that.menu = NavigatorService.pages.about;
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'philosophy'
+                    || state.name === 'contact';
+            });
 
+
+        that.states = states;
     }
 
 }());

@@ -2,8 +2,8 @@
 <div class="col-xs-6 col-sm-3 sidebar-offcanvas" role="navigation" ng-controller="SideBarController as sidebar" style="padding-left:0;">    
     <div class="hidden-sm hidden-md hidden-lg">
         <ul id="sidebar_ul" class="list-group list-no-bullet" pcd-device-height>
-            <li ng-repeat="item in sidebar.menu.items">
-                <a class="list-group-item side-bar-link" ng-href="{{item.path}}" ng-bind="item.display" ng-click="sidebar.toggleSideBar()"></a>
+            <li ng-repeat="state in sidebar.states">
+                <a class="list-group-item side-bar-link" ui-sref="{{state.name}}" ng-bind="state.display" ng-click="sidebar.toggleSideBar()"></a>
             </li>            
             <span ng-bind="sidebar.project.name"></span>
         </ul>

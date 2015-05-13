@@ -3,19 +3,20 @@
     'use strict';
 
     angular.module('pineappleclub.side-bar', [
-        'pineappleclub.app-configuration-service',
-        'pineappleclub.navigator-service',
-        'pineappleclub.device-height-directive'
+        'pineappleclub.device-height-directive',
+        'pineappleclub.app-configuration-service',        
+        'pineappleclub.authorisation-constant'
     ])
     .controller('SideBarController', SideBarController);
 
     SideBarController.$inject = [
         'AppConfigurationService',
-        'NavigatorService'
+        'AUTHORISATION'
     ];
 
-    function SideBarController(AppConfigurationService, NavigatorService) {
-        var that = this;
+    function SideBarController(AppConfigurationService, AUTHORISATION) {
+        var that = this,
+            states;
 
         that.configs = {
             ELE_SIDEBAR: ".row-offcanvas",
@@ -23,9 +24,18 @@
             CSS_SIDEBARSHOW: "side-bar-show",
             CSS_SIDEBARHIDE: "side-bar-hide"
         };
+        
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'home'
+                    || state.name === 'services'
+                    || state.name === 'philosophy'
+                    || state.name === 'photos'
+                    || state.name === 'contact';
+            });
 
         that.project = AppConfigurationService.companyInfo;
-        that.menu = NavigatorService.pages.main;
+        that.states = states;
         that.toggleSideBar = $.proxy(toggleSideBar, that);
 
         function toggleSideBar() {

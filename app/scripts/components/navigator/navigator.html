@@ -16,11 +16,8 @@
         <div>
             <div class="navbar-collapse collapse">
                 <menu class="nav navbar-nav navbar-right">
-                    <li ng-repeat="nav in navigator.menu.items">
-                        <a ui-sref="{{nav.name}}" ng-bind="nav.display"></a>
-                    </li>
-                    <li>
-                        <a ui-sref="user-profile">userprofile</a>
+                    <li ng-repeat="state in navigator.states">
+                        <a ui-sref="{{state.name}}" ng-bind="state.display"></a>
                     </li>
                 </menu>
             </div>
