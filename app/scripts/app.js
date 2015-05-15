@@ -8,6 +8,7 @@
         'ngResource',
         'ngProgress',
         'ngCookies',
+        'toaster',
         'pineappleclub.application',
         'pineappleclub.home',
         'pineappleclub.navigator',

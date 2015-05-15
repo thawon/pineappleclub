@@ -28,9 +28,11 @@
                 that.user = user;
             });
 
-        that.updateFn = function () {
-            DataService.saveChanges();
-        };
+        that.save = DataService.saveChanges();
+        that.fail = function (error) {
+            var x;
+            x = 1;
+        }
 
         that.updateFnB = function () {
             console.log('B save here.');

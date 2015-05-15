@@ -1,9 +1,8 @@
-﻿<div class="container">
-        
+﻿<div class="container">    
     <h2>Profile</h2>
 
     <pcd-expandable-container data-header="Personal Details">
-        <pcd-entity-detail-container update-fn="userProfile.updateFn()">
+        <pcd-entity-detail-container save-fn="userProfile.save()" fail-fn="userProfile.fail">
             <div data-detail default data-mode="show">
                 <table class="table-views">
                     <thead>
@@ -35,7 +34,7 @@
     </pcd-expandable-container>
         
     <pcd-expandable-container data-header="Login">
-        <pcd-entity-detail-container update-fn="userProfile.updateFnB()">
+        <pcd-entity-detail-container save-fn="userProfile.updateFnB()">
             <div data-detail default data-mode="show">
                 <table class="table-views">
                     <thead>

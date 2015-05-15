@@ -19,14 +19,10 @@
 
         return dataService;
 
-        function saveChanges() {
-            return manager.saveChanges()
-                .then(function (saveResult) {
-                    console.log('saved successfully');
-                })
-                .catch(function (error) {
-                    console.log(error)
-                });
+        function saveChanges(fn) {
+            return function () {
+                return manager.saveChanges();
+            }
         }
     }
 

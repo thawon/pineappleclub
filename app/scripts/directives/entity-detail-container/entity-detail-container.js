@@ -3,30 +3,53 @@
     'use strict';
 
     angular.module('pineappleclub.entity-detail-container', [
-        'pineappleclub.view-modes-constant'
+        'pineappleclub.view-modes-constant',
+        'pineappleclub.export-service'
     ])
     .directive('pcdEntityDetailContainer', EntityDetailContainerDirective);
 
     EntityDetailContainerDirective.$inject = [
-        'VIEW_MODES'
+        'toaster',
+        'VIEW_MODES',
+        'ExportService'
     ];
 
-    function EntityDetailContainerDirective(VIEW_MODES) {
+    function EntityDetailContainerDirective(toaster, VIEW_MODES, ExportService) {
 
         return {
             restrict: 'E',
             transclude: true,
             scope: {
-                updateFn: '&'
+                saveFn: '&',
+                failFn: '&'
             },
             link: function (scope, element, attrs) {
-                var getViews = function () {
+
+                scope.edit = changeMode(VIEW_MODES.edit);
+                scope.cancel = changeMode(VIEW_MODES.show);
+
+                scope.save = save(afterSave);
+
+                scope.saveAndClose = save(afterSaveAndClose);
+
+                showDefaultView();
+
+                function afterSave() {
+                    changeMode(VIEW_MODES.show)();
+                }
+
+                function afterSaveAndClose() {
+                    ExportService.history.back();
+                }
+
+                function getViews() {
                     var $this = $(element),
                         views = $this.find('.view-detail').find('[data-mode]');
 
                     return views;
-                },
-                changeMode = function (mode) {
+                }
+
+                function changeMode(mode) {
                     return function () {
                         var $this = $(element),
                             views = getViews(),
@@ -37,8 +60,9 @@
 
                         scope.mode = mode;
                     }
-                },
-                showDefaultView = function () {
+                }
+
+                function showDefaultView() {
                     var $this = $(element),
                         views = getViews(),
                         view = $this.find('.view-detail').find('[default]');
@@ -47,21 +71,56 @@
                     view.show();
 
                     scope.mode = $(view).attr('data-mode');
-                },
-                save = function () {
-                    scope.updateFn();
-                    changeMode(VIEW_MODES.show)();
-                };
+                }
 
-                scope.edit = changeMode(VIEW_MODES.edit);
-                scope.cancel = changeMode(VIEW_MODES.show);
-                scope.save = save;
+                function save(after) {
+                    return function () {
+                        var waitToastId = 'waitingId',
+                            errorToasterId = 'errorId',
+                            successtoasterOptions = {
+                                type: 'success',
+                                body: 'saved successfully',
+                                timeout: 2000
+                            },
+                            waitToasterOptions = {
+                                type: 'wait',
+                                body: 'saving...',
+                                toastId: waitToastId,
+                                toasterId: waitToastId
+                            },
+                            errorToasterOptions = {
+                                type: 'error',
+                                body: 'saved unsuccessfully'
+                            };
 
-                showDefaultView();
+                        toaster.pop(waitToasterOptions);
+
+                        scope.saveFn()
+                            .then(function (saveResult) {
+                                toaster.clear(waitToastId, waitToastId);
+                                
+                                toaster.pop(successtoasterOptions);
+
+                                after();
+
+                                return saveResult;
+                            })
+                            .catch(function (error) {
+                                toaster.clear(waitToastId, waitToastId);
+
+                                toaster.pop(errorToasterOptions);
+                                
+                                // not sure why i need to the function like this ()(error)
+                                scope.failFn()(error);
+
+                                return error;
+                            });
+                    }
+                }
+
             },
             templateUrl: 'scripts/directives/entity-detail-container/entity-detail-container.html'
         }
         
     }
-
 }());
