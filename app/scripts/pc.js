@@ -8,6 +8,7 @@
         'ngResource',
         'ngProgress',
         'ngCookies',
+        'toaster',
         'pineappleclub.application',
         'pineappleclub.home',
         'pineappleclub.navigator',
@@ -47,8 +48,8 @@
 
         $httpProvider.interceptors.push("AuthInterceptor");
     }])
-    .run(['$rootScope', 'StateChangeService', 'ngProgress',
-    function ($rootScope, StateChangeService, ngProgress) {
+    .run(['breeze', '$rootScope', 'StateChangeService', 'ngProgress',
+    function (breeze, $rootScope, StateChangeService, ngProgress) {
 
         $rootScope.$on("$stateChangeStart", function (event, next) {
             StateChangeService.change(next.data.authorizedRoles);
@@ -69,19 +70,22 @@
         'ngProgress',
         'pineappleclub.app-configuration-service',
         'pineappleclub.auth-service',
-        'pineappleclub.user-service'
+        'pineappleclub.user-service',
+        'pineappleclub.auth-events-constant'
     ])
     .controller('ApplicationController', ApplicationController);
 
     ApplicationController.$inject = [
+        '$rootScope',
         'ngProgress',
         'AppConfigurationService',
         'AuthService',
-        'UserService'
+        'UserService',
+        'AUTH_EVENTS'
     ];
 
-    function ApplicationController(ngProgress, AppConfigurationService,
-        AuthService, UserService) {
+    function ApplicationController($rootScope, ngProgress, AppConfigurationService,
+        AuthService, UserService, AUTH_EVENTS) {
 
         var that = this;
 
@@ -130,15 +134,30 @@
 
     'use strict';
 
-    angular.module('pineappleclub.dashboard', [])
+    angular.module('pineappleclub.dashboard', [
+        'pineappleclub.authorisation-constant',
+        'pineappleclub.user-service'
+    ])
     .controller('DashboardController', DashboardController);
 
-    DashboardController.$inject = [];
+    DashboardController.$inject = [
+        'AUTHORISATION',
+        'UserService'
+    ];
 
-    function DashboardController() {
+    function DashboardController(AUTHORISATION, UserService) {
+        var that = this,
+            states, currentUser;
 
-        var that = this;
+        that.currentUser = UserService.getCurrentUser();
 
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return (state.data.authorizedRoles.indexOf(that.currentUser.userRole) !== -1)
+                        && state.name !== 'dashboard';
+            });
+
+        that.states = states;
     }
 
 }());
@@ -147,19 +166,26 @@
     'use strict';
 
     angular.module('pineappleclub.footer', [
-        'pineappleclub.navigator-service'
+        'pineappleclub.authorisation-constant'
     ])
     .controller('FooterController', FooterController);
 
     FooterController.$inject = [
-        'NavigatorService'
+        'AUTHORISATION'
     ];
 
-    function FooterController(NavigatorService) {
-        var that = this;
+    function FooterController(AUTHORISATION) {
+        var that = this,
+            states;
 
-        that.menu = NavigatorService.pages.about;
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'philosophy'
+                    || state.name === 'contact';
+            });
 
+
+        that.states = states;
     }
 
 }());
@@ -342,21 +368,32 @@
 
     angular.module('pineappleclub.navigator', [
         'pineappleclub.app-configuration-service',
-        'pineappleclub.navigator-service'
+        'pineappleclub.authorisation-constant'
     ])
     .controller('NavigatorController', NavigatorController);
 
     NavigatorController.$inject = [
         'AppConfigurationService',
-        'NavigatorService'
+        'AUTHORISATION'
     ];
 
-    function NavigatorController(AppConfigurationService, NavigatorService) {
-
-        this.companyInfo = AppConfigurationService.companyInfo;
-        this.menu = NavigatorService.pages.main;
+    function NavigatorController(AppConfigurationService, AUTHORISATION) {
+        var that = this,
+            states;
         
-        this.toggleSideBar = function () {            
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'home'
+                    || state.name === 'services'
+                    || state.name === 'philosophy'
+                    || state.name === 'photos'
+                    || state.name === 'contact';
+            });
+
+        that.companyInfo = AppConfigurationService.companyInfo;
+        that.states = states;
+        
+        that.toggleSideBar = function () {
             $('.row-offcanvas').toggleClass('active');
         }
     }
@@ -390,19 +427,27 @@
     'use strict';
 
     angular.module('pineappleclub.side-bar', [
+        'pineappleclub.device-height-directive',
         'pineappleclub.app-configuration-service',
-        'pineappleclub.navigator-service',
-        'pineappleclub.device-height-directive'
+        'pineappleclub.auth-service',
+        'pineappleclub.authorisation-constant',
+        'pineappleclub.auth-events-constant'
     ])
     .controller('SideBarController', SideBarController);
 
     SideBarController.$inject = [
+        '$rootScope',
         'AppConfigurationService',
-        'NavigatorService'
+        'AuthService',
+        'AUTHORISATION',
+        'AUTH_EVENTS'
     ];
 
-    function SideBarController(AppConfigurationService, NavigatorService) {
-        var that = this;
+    function SideBarController($rootScope, AppConfigurationService, AuthService,
+        AUTHORISATION, AUTH_EVENTS) {
+
+        var that = this,
+            states;
 
         that.configs = {
             ELE_SIDEBAR: ".row-offcanvas",
@@ -410,14 +455,41 @@
             CSS_SIDEBARSHOW: "side-bar-show",
             CSS_SIDEBARHIDE: "side-bar-hide"
         };
+        
+        states = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'home'
+                    || state.name === 'services'
+                    || state.name === 'philosophy'
+                    || state.name === 'photos'
+                    || state.name === 'contact';
+            });
+
+        that.dashboardState = _.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return state.name === 'dashboard'
+            })[0];
 
         that.project = AppConfigurationService.companyInfo;
-        that.menu = NavigatorService.pages.main;
+        that.states = states;
+        that.isShownDashboard = AuthService.isAuthenticated();
         that.toggleSideBar = $.proxy(toggleSideBar, that);
+
+        $rootScope.$on(AUTH_EVENTS.loginSuccess, function () {
+            that.isShownDashboard = true;
+        });
+
+        $rootScope.$on(AUTH_EVENTS.authenticated, function () {
+            that.isShownDashboard = true;
+        });
+
+        $rootScope.$on(AUTH_EVENTS.logoutSuccess, function () {
+            that.isShownDashboard = false;
+        });
 
         function toggleSideBar() {
             $(that.configs.ELE_SIDEBAR).toggleClass(that.configs.CONS_ACTIVE);
-        }
+        }        
     }
 
 }());
@@ -425,25 +497,73 @@
 
     'use strict';
 
-    angular.module('pineappleclub.user-profile', [])
-    .controller('UserProfileController', UserProfileController);
+    angular.module('pineappleclub.user-model', [
+        'pineappleclub.util-service'
+    ])
+    .factory('UserModelService', UserModelService);
 
-    UserProfileController.$inject = [];
+    UserModelService.$inject = [
+        'UtilService'
+    ];
 
-    function UserProfileController() {
-        var that = this;
+    function UserModelService(UtilService) {
+        var type = breeze.DataType,
+            userModelService = {
+                model: function () { },
+                getType: function () {
+                    return {
+                        name: 'User',
+                        dataProperties: {
+                            id: { type: type.MongoObjectId },
+                            firstname: { required: true, max: 10 },
+                            lastname: { required: true, max: 50 },
+                            userRole: { required: true, max: 10 },
+                            lastLoggedInDateTime: { type: type.DateTime }
+                        }
+                    };
+                }
+            };
 
-        that.updateFn = function () {
-            console.log("A save here.");
-        };
+        UtilService.defineProperty(userModelService.model, 'fullname', function () {
+            return this.firstname + ' ' + this.lastname;
+        });
 
-        that.updateFnB = function () {
-            console.log("B save here.");
-        };
+        return userModelService;
+    }
 
-        that.saveXX = function () {
-            console.log("save here.");
-        };
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.user-profile-service', [
+        'pineappleclub.entity-manager-factory'
+    ])
+    .factory('UserProfileService', UserProfileService);
+
+    UserProfileService.$inject = [
+        'EntityManagerFactory'        
+    ];
+
+    function UserProfileService(EntityManagerFactory, UserService) {
+        var manager = EntityManagerFactory.getManager(),
+            userProfileService = {
+                getUser: getUser
+            }
+
+        return userProfileService;
+
+        function getUser(id) {
+            return manager.fetchEntityByKey('User', id)
+                .then(function (data) {
+                    return data.entity;
+                })
+                .catch(function (error) {
+                    console.log(error)
+                });
+
+        }
+
     }
 
 }());
@@ -453,27 +573,35 @@
 
     angular.module('pineappleclub.user-profile', [
         'pineappleclub.entity-detail-container',
-        'pineappleclub.expandable-container'
+        'pineappleclub.expandable-container',
+        'pineappleclub.user-profile-service',
+        'pineappleclub.data-service',
+        'pineappleclub.user-service'
     ])
     .controller('UserProfileController', UserProfileController);
 
     UserProfileController.$inject = [
+        'UserProfileService',
+        'DataService',
         'UserService'
     ];
 
-    function UserProfileController(UserService) {
-        var that = this;
+    function UserProfileController(UserProfileService, DataService, UserService) {
+        var that = this,
+            currentUser = UserService.getCurrentUser();
 
         that.user = null;
 
-        UserService.getUsers()
+        UserProfileService.getUser(currentUser._id)
             .then(function (user) {
                 that.user = user;
             });
 
-        that.updateFn = function () {
-            UserService.save();
-        };
+        that.save = DataService.saveChanges();
+        that.fail = function (error) {
+            var x;
+            x = 1;
+        }
 
         that.updateFnB = function () {
             console.log('B save here.');
@@ -490,13 +618,14 @@
     'use strict';
 
     var AUTH_EVENTS = {
-        loginSuccess: "auth-login-success",
-        loginFailed: "auth-login-failed",
-        logoutSuccess: "auth-logout-success",
-        logoutFailed: "auth-logout-failed",
-        sessionTimeout: "auth-session-timeout",
-        notAuthenticated: "auth-not-authenticated",
-        notAuthorized: "auth-not-authorized"
+        loginSuccess: 'auth-login-success',
+        loginFailed: 'auth-login-failed',
+        logoutSuccess: 'auth-logout-success',
+        logoutFailed: 'auth-logout-failed',
+        sessionTimeout: 'auth-session-timeout',
+        authenticated: 'auth-authenticated',
+        notAuthenticated: 'auth-not-authenticated',
+        notAuthorized: 'auth-not-authorized'
     };
 
     angular.module('pineappleclub.auth-events-constant', [])
@@ -519,32 +648,35 @@
             [
                 {
                     name: 'home',
+                    display: 'Home',
                     url: '/',
                     templateUrl: 'scripts/components/home/home.html',
                     controller: 'HomeController as home',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Child Care Service",
-                            description: "We provide high quality child care service supported by Integricare." +
-                                            "The service is operated by experienced diploma qualification educator."
+                            title: 'Child Care Service',
+                            description: 'We provide high quality child care service supported by Integricare.' +
+                                            'The service is operated by experienced diploma qualification educator.'
                         }
                     }
                 },
                 {
                     name: 'services',
+                    display: 'Services',
                     url: '/services',
                     templateUrl: 'scripts/components/services/services.html',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Family Day Care, Before/After school care, Vocation care",
-                            description: "We provide Family Day Care, Before/After school care and Vocation care."
+                            title: 'Family Day Care, Before/After school care, Vocation care',
+                            description: 'We provide Family Day Care, Before/After school care and Vocation care.'
                         }
                     }
                 },
                 {
                     name: 'philosophy',
+                    display: 'Philosophy',
                     url: '/philosophy',
                     templateUrl: 'scripts/components/philosophy/philosophy.html',
                     data: {
@@ -557,40 +689,43 @@
                 },
                 {
                     name: 'photos',
+                    display: 'Photos',
                     url: '/photos',
                     templateUrl: 'scripts/components/photos/photos.html',
                     controller: 'PhotosController as photos',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Playroom, Creative corner, Art and craft and outside playground",
-                            description: "Our facilities are Playroom, Creative corner, Art and craft and outside playground."
+                            title: 'Playroom, Creative corner, Art and craft and outside playground',
+                            description: 'Our facilities are Playroom, Creative corner, Art and craft and outside playground.'
                         }
                     }
                 },
                 {
                     name: 'contact',
+                    display: 'Contact',
                     url: '/contact',
                     templateUrl: 'scripts/components/contact/contact.html',
                     controller: 'ContactController as contact',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Near Rockdale and Banksia train station",
-                            description: "Our location is near Rockdale and Banksia train station."
+                            title: 'Near Rockdale and Banksia train station',
+                            description: 'Our location is near Rockdale and Banksia train station.'
                         }
                     }
                 },
                 {
                     name: 'dashboard',
+                    display: 'Dashboard',
                     url: '/dashboard',
                     templateUrl: 'scripts/components/dashboard/dashboard.html',
                     controller: 'DashboardController as dashboard',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {
-                            title: "Admin Dashboard",
-                            description: ""
+                            title: 'Admin Dashboard',
+                            description: ''
                         }
                     }
                 },
@@ -602,8 +737,8 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Login",
-                            description: "admin user authentication"
+                            title: 'Login',
+                            description: 'admin user authentication'
                         }
                     }
                 },
@@ -614,23 +749,25 @@
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
-                            title: "Signout",
-                            description: "User is signed out"
+                            title: 'Signout',
+                            description: 'User is signed out'
                         }
                     }
                 },
                 {
                     name: 'user-profile',
+                    display: 'My Profile',
                     url: '/user-profile',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as userProfile',
                     data: {
-                        authorizedRoles: [USER_ROLES.all],
+                        authorizedRoles: [USER_ROLES.admin],
                         page: {
-                            title: "User Profile Details",
-                            description: "View/Edit user profile"
+                            title: 'User Profile Details',
+                            description: 'View/Edit user profile'
                         }
-                    }
+                    },
+                    icon: '/images/user-profile.png'
                 }
             ]
     };
@@ -720,62 +857,126 @@
     'use strict';
 
     angular.module('pineappleclub.entity-detail-container', [
-        'pineappleclub.view-modes-constant'
+        'pineappleclub.view-modes-constant',
+        'pineappleclub.export-service'
     ])
     .directive('pcdEntityDetailContainer', EntityDetailContainerDirective);
 
     EntityDetailContainerDirective.$inject = [
-        'VIEW_MODES'
+        'toaster',
+        'VIEW_MODES',
+        'ExportService'
     ];
 
-    function EntityDetailContainerDirective(VIEW_MODES) {
+    function EntityDetailContainerDirective(toaster, VIEW_MODES, ExportService) {
 
         return {
-            restrict: "E",
+            restrict: 'E',
             transclude: true,
             scope: {
-                updateFn: "&"
+                saveFn: '&',
+                failFn: '&'
             },
             link: function (scope, element, attrs) {
-                var getViews = function () {
+
+                scope.edit = changeMode(VIEW_MODES.edit);
+                scope.cancel = changeMode(VIEW_MODES.show);
+
+                scope.save = save(afterSave);
+
+                scope.saveAndClose = save(afterSaveAndClose);
+
+                showDefaultView();
+
+                function afterSave() {
+                    changeMode(VIEW_MODES.show)();
+                }
+
+                function afterSaveAndClose() {
+                    ExportService.history.back();
+                }
+
+                function getViews() {
                     var $this = $(element),
-                        views = $this.find(".view-detail").find("[data-mode]");
+                        views = $this.find('.view-detail').find('[data-mode]');
 
                     return views;
-                },
-                changeMode = function (mode) {
+                }
+
+                function changeMode(mode) {
                     return function () {
                         var $this = $(element),
                             views = getViews(),
-                            view = $this.find(".view-detail").find("[data-mode='" + mode + "']");
+                            view = $this.find('.view-detail').find("[data-mode='" + mode + "']");
 
                         $(views).hide();
                         $(view).show();
 
                         scope.mode = mode;
                     }
-                },
-                showDefaultView = function () {
+                }
+
+                function showDefaultView() {
                     var $this = $(element),
                         views = getViews(),
-                        view = $this.find(".view-detail").find("[default]");
+                        view = $this.find('.view-detail').find('[default]');
 
                     views.hide();
                     view.show();
 
-                    scope.mode = $(view).attr("data-mode");
-                };
+                    scope.mode = $(view).attr('data-mode');
+                }
 
-                scope.edit = changeMode(VIEW_MODES.edit);
-                scope.cancel = changeMode(VIEW_MODES.show);
+                function save(after) {
+                    return function () {
+                        var waitToastId = 'waitingId',
+                            errorToasterId = 'errorId',
+                            successtoasterOptions = {
+                                type: 'success',
+                                body: 'saved successfully',
+                                timeout: 2000
+                            },
+                            waitToasterOptions = {
+                                type: 'wait',
+                                body: 'saving...',
+                                toastId: waitToastId,
+                                toasterId: waitToastId
+                            },
+                            errorToasterOptions = {
+                                type: 'error',
+                                body: 'saved unsuccessfully'
+                            };
 
-                showDefaultView();
+                        toaster.pop(waitToasterOptions);
+
+                        scope.saveFn()
+                            .then(function (saveResult) {
+                                toaster.clear(waitToastId, waitToastId);
+                                
+                                toaster.pop(successtoasterOptions);
+
+                                after();
+
+                                return saveResult;
+                            })
+                            .catch(function (error) {
+                                toaster.clear(waitToastId, waitToastId);
+
+                                toaster.pop(errorToasterOptions);
+                                
+                                // not sure why i need to the function like this ()(error)
+                                scope.failFn()(error);
+
+                                return error;
+                            });
+                    }
+                }
+
             },
-            templateUrl: "scripts/directives/entity-detail-container/entity-detail-container.html"
+            templateUrl: 'scripts/directives/entity-detail-container/entity-detail-container.html'
         }
-
+        
     }
-
 }());
 (function () {
 
@@ -912,10 +1113,18 @@
             },
             progress: {
                 color: '#1d9ad9'
+            },
+            getServiceName: getServiceName,
+            breezejs: {
+                httpTimeout: 10000
             }
         };
 
         return configuration;
+
+        function getServiceName(endpoint) {
+            return 'api' + endpoint
+        }
     }
 
 }());
@@ -951,37 +1160,41 @@
 }());
 (function () {
 
-    'use strict';
+    'use strict';    
 
     angular.module('pineappleclub.auth-service', [
-        'ngCookies'
+        'pineappleclub.cookie-service',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('AuthService', AuthService);
 
     AuthService.$inject = [
-        '$cookieStore',
-        '$http'
+        // Cookie Service is used instead of $cookieStore because it does not work after load the breezejs library        
+        'CookieService',
+        '$http',
+        'AppConfigurationService'
     ];
 
-    function AuthService($cookieStore, $http) {
+    function AuthService(CookieService, $http, AppConfigurationService) {
 
         var authService = {
-            login: login,
-            logout: logout,
-            authenticated: authenticated,
-            isAuthenticated: isAuthenticated,
-            isAuthorized: isAuthorized,
-            getCurrentUser: getCurrentUser
-        };
+                login: login,
+                logout: logout,
+                authenticated: authenticated,
+                isAuthenticated: isAuthenticated,
+                isAuthorized: isAuthorized,
+                getCurrentUser: getCurrentUser
+            },
+            serviceName = AppConfigurationService.getServiceName;
 
         return authService;
-
+        
         function setCurrentUser(user) {
-            localStorage.setItem('user', JSON.stringify(user));
+            CookieService.setCookie('user', user);
         }
 
         function login(credentials) {
-            return $http.post('/api/login', credentials)
+            return $http.post(serviceName('/login'), credentials)
                 .then(function (res) {
                     var data = res.data;
 
@@ -994,12 +1207,12 @@
         };
 
         function logout() {
-            return $http.post('/api/logout')
+            return $http.post(serviceName('/logout'))
                 .then(function (res) {
                     var data = res.data;
 
-                    if (data.success) {
-                        localStorage.removeItem('user');
+                    if (data.success) {                        
+                        CookieService.removeCookie('user');
                     }
 
                     return data;
@@ -1008,9 +1221,9 @@
 
         function authenticated() {
 
-            localStorage.removeItem('user');
-
-            return $http.post('/api/authenticated')
+            CookieService.removeCookie('user');
+            
+            return $http.post(serviceName('/authenticated'))
                 .then(function (res) {
                     var data = res.data;
                     if (data.success) {
@@ -1037,11 +1250,74 @@
         };
 
         function getCurrentUser() {
-            var user = localStorage.getItem('user');
-
-            return (user) ? JSON.parse(user) : null;
+            return CookieService.getCookie('user');
         }
 
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.cookie-service', [])
+    .factory('CookieService', CookieService);
+
+    CookieService.$inject = [];
+
+    function CookieService() {
+
+        var cookieService = {
+            getCookie: getCookie,
+            setCookie: setCookie,
+            removeCookie: removeCookie
+        };
+
+        return cookieService;
+
+        function getCookie(name) {
+            var cookie = localStorage.getItem(name);
+
+            return (cookie) ? JSON.parse(cookie) : null;
+        }
+
+        function setCookie(name, cookie) {
+            localStorage.setItem(name, JSON.stringify(cookie));
+        }
+
+        function removeCookie(name) {
+            localStorage.removeItem(name);
+        }
+
+    }
+
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.data-service', [
+        'pineappleclub.entity-manager-factory'
+    ])
+    .factory('DataService', DataService);
+
+    DataService.$inject = [
+        'EntityManagerFactory'
+    ];
+
+    function DataService(EntityManagerFactory) {
+        var manager = EntityManagerFactory.getManager(),
+            dataService = {                
+                saveChanges: saveChanges
+            }
+
+        return dataService;
+
+        function saveChanges(fn) {
+            return function () {
+                return manager.saveChanges();
+            }
+        }
     }
 
 }());
@@ -1057,17 +1333,19 @@
     'use strict';
 
     angular.module('pineappleclub.entity-manager-factory', [
-        'pineappleclub.model'
+        'pineappleclub.model',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('EntityManagerFactory', EntityManagerFactory);
 
     EntityManagerFactory.$inject = [
-        'breeze',
-        'model'
+        'model',
+        'AppConfigurationService'
     ];
 
-    function EntityManagerFactory(breeze, model) {
-        var dataService, masterManager, metadataStore, service;
+    function EntityManagerFactory(model, AppConfigurationService) {
+        var dataService, masterManager, metadataStore, service,
+            config = AppConfigurationService.breezejs;
 
         configureBreezeForThisApp();
         metadataStore = getMetadataStore();
@@ -1082,7 +1360,7 @@
         function configureBreezeForThisApp() {
             breeze.config.initializeAdapterInstance('dataService', 'mongo', true);
             initBreezeAjaxAdapter('0');
-            dataService = new breeze.DataService({ serviceName: 'api' })
+            dataService = new breeze.DataService({ serviceName: AppConfigurationService.getServiceName('') })
         }
 
         // get the 'master manager', creating it if necessary
@@ -1105,7 +1383,7 @@
                 headers: {
                     'X-UserSessionId': userSessionId
                 },
-                timeout: 10000
+                timeout: config.httpTimeout
             };
         }
 
@@ -1141,14 +1419,16 @@
 (function() {
     'use strict';
 
-    angular.module("pineappleclub.meta-data", [])
-    .factory('metadata', factory);
+    angular.module("pineappleclub.meta-data", [
+        'pineappleclub.user-model'
+    ])
+    .factory('metadata', Metadata);
 
-    factory.$inject = [
-        'breeze'
+    Metadata.$inject = [
+        'UserModelService'
     ];
 
-    function factory(breeze) {
+    function Metadata(UserModelService) {
         return {
             createMetadataStore: createMetadataStore
         };
@@ -1159,13 +1439,13 @@
 
             var store = new breeze.MetadataStore({ namingConvention: namingConvention });
 
-            fillMetadataStore(store);
+            fillMetadataStore(store, UserModelService);
 
             return store;
         }
 
         function createNamingConvention() {
-            // Translate certain zza property names between MongoDb names and client names
+            // Translate certain property names between MongoDb names and client names
             var convention = new breeze.NamingConvention({
                 serverPropertyNameToClient: function(serverPropertyName) {
                     switch (serverPropertyName) {
@@ -1183,7 +1463,7 @@
             return convention;
         }
 
-        function fillMetadataStore(store) {
+        function fillMetadataStore(store, UserModelService) {
             // Using Breeze Labs: breeze.metadata.helper.js
             // https://github.com/IdeaBlade/Breeze/blob/master/Breeze.Client/Scripts/Labs/breeze.metadata-helper.js
             // The helper reduces data entry by applying common conventions
@@ -1193,7 +1473,7 @@
             var keyGen = breeze.AutoGeneratedKeyType.None;
 
             // namespace of the corresponding classes on the server
-            var namespace = 'Zza.Model';
+            var namespace = 'Pineapple.Model';
 
             var helper = new breeze.config.MetadataHelper(namespace, keyGen);
 
@@ -1201,27 +1481,8 @@
 
             // addType - make it easy to add the type to the store using the helper
             var addType = function (type) { helper.addTypeToStore(store, type); };
-
-            // DataTypes
-            var DT = breeze.DataType;
-            var BOOL = DT.Boolean;
-            var DATE = DT.DateTime;
-            var DECIMAL = DT.Decimal;
-            var LUID = DT.Int32; // "Lookup" Id
-            var ID = DT.MongoObjectId; // Root entity Id
-
-            addUser();
-
-            function addUser() {
-                addType({
-                    name: 'User',
-                    dataProperties: {
-                        id: { type: ID },
-                        firstname: { max: 100 },
-                        lastname: { max: 100 }
-                    }
-                });
-            }
+            
+            addType(UserModelService.getType());
 
         }
     }
@@ -1244,27 +1505,24 @@
     'use strict';
 
     angular.module('pineappleclub.model', [
-        'pineappleclub.meta-data'
+        'pineappleclub.meta-data',
+        'pineappleclub.user-model'
     ])
     .factory('model', factory);
 
     factory.$inject = [
-        'breeze',
-        'metadata'
+        'metadata',
+        'UserModelService'
     ];
 
-    function factory(breeze, metadata) {
+    function factory(metadata, UserModelService) {
+
         var model = {
-            getMetadataStore: getMetadataStore,
-            User: User
+            getMetadataStore: getMetadataStore
         };
 
         return model;
-
-        /////////////////////
-        // Model classes
-        function User() { }
-
+        
         // Fill metadataStore with metadata, then enrich the types
         // with add/remove methods, property aliases, and sub-document navigation properties
         // that can't be represented (yet) in Breeze metadata.
@@ -1277,14 +1535,9 @@
             // these model types contain extensions to the type definitions from metadata.js
             var registerType = metadataStore.registerEntityTypeCtor.bind(metadataStore);
 
-            registerUser();
+            registerType('User', UserModelService.model);
 
             return metadataStore;
-            ///////////////////////////////
-
-            function registerUser() {
-                registerType('User', User);
-            }
                         
         }
     }
@@ -1429,61 +1682,23 @@
 
     'use strict';
 
-    angular.module('pineappleclub.user-service', [
-        'pineappleclub.entity-manager-factory',
-        'pineappleclub.model'
-    ])
+    angular.module('pineappleclub.user-service', [])
     .factory('UserService', UserService);
 
-    UserService.$inject = [
-        'EntityManagerFactory',
-        'model'
-    ];
+    UserService.$inject = [];
 
-    function UserService(EntityManagerFactory, model) {
+    function UserService() {
         var currentUser,
-            manager = EntityManagerFactory.getManager(),
             userService = {
             getCurrentUser: function () {
                 return currentUser;
             },
             setCurrentUser: function (user) {
                 currentUser = user;
-            },
-            getUsers: getUsers,
-            save: save
+            }
         }
 
         return userService;
-
-        function getUsers() {
-            //var users = manager.getEntities('User');
-
-            return breeze.EntityQuery.from('User')
-                    .where('id', 'eq', '54603b40496fba9c2301f5db')
-                    //.orderBy('firstname desc')
-                    .using(manager).execute()
-                    .then(function (data) {
-                        return data.results[0];
-                    })
-                    .catch(function (error) {
-                        var x;
-                        x = 1;
-                    });
-            
-        }
-
-        function save() {
-            return manager.saveChanges()
-                .then(function (saveResult) {
-                    var x;
-                    x = 1;
-                })
-                .catch(function (error) {
-                    var x;
-                    x = 1;
-                });
-        }
     }
 
 }());
@@ -1500,13 +1715,26 @@
         var util = {
                 device: {
                     isBreakpoint: isBreakpoint
-                }
+                },
+                defineProperty: defineProperty
             };
 
         return util;
 
         function isBreakpoint (size) {
             return $('.device-' + size).is(':visible');
+        }
+
+        // Assist in adding an ECMAScript 5 "definedProperty" to a class
+        function defineProperty(klass, propertyName, getter, setter) {
+            var config = {
+                enumerable: true,
+                get: getter
+            };
+            if (setter) {
+                config.set = setter;
+            }
+            Object.defineProperty(klass.prototype, propertyName, config);
         }
     }
 
