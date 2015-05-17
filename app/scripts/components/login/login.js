@@ -3,29 +3,46 @@
     'use strict';
 
     angular.module('pineappleclub.login', [
-        'ngCookies',
         'pineappleclub.auth-service',
         'pineappleclub.state-service',
         'pineappleclub.user-service',
         'pineappleclub.auth-events-constant',
-        'pineappleclub.string-constant'
+        'pineappleclub.string-constant',
+        'pineappleclub.user-profile-service'
     ])
         .controller('LoginController', LoginController);
 
     LoginController.$inject = [
         '$rootScope', 
-        '$cookieStore',
         'AuthService',
         'StateService',
         'UserService',
         'AUTH_EVENTS',
-        'STRING'
+        'STRING',
+        'UserProfileService',
+        'toaster'
     ];
 
-    function LoginController($rootScope, $cookieStore, AuthService,
-        StateService, UserService, AUTH_EVENTS, STRING) {
+    function LoginController($rootScope, AuthService, StateService,
+        UserService, AUTH_EVENTS, STRING, UserProfileService, toaster) {
         
-        var that = this;
+        var that = this,
+            waitToastId = 'waitingId',
+            successtoasterOptions = {
+                type: 'success',
+                body: 'logged in successfully',
+                timeout: 2000
+            },
+            waitToasterOptions = {
+                type: 'wait',
+                body: 'logging in...',
+                toastId: waitToastId,
+                toasterId: waitToastId
+            },
+            errorToasterOptions = {
+                type: 'error',
+                body: 'logged in unsuccessfully'
+            };
 
         that.credentials = {
             email: STRING.empty,
@@ -35,19 +52,36 @@
         that.errorMessage = null;
 
         that.login = function (credentials) {
+
             AuthService.login(credentials)
-            .then(function (res) {
-                var user = AuthService.getCurrentUser();
+            .then(function (user) {
 
-                UserService.setCurrentUser(user);
+                toaster.pop(waitToasterOptions);
 
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                // fetch using breezejs manager so the entity is added to the graph            
+                UserProfileService.getUser(user._id)
+                .then(function (user) {
 
-                goDashboard();
+                    toaster.clear(waitToastId, waitToastId);
+
+                    // current user is user entity, not a plain javascript object
+                    UserService.setCurrentUser(user);
+
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+
+                    goDashboard();
+
+                    toaster.pop(successtoasterOptions);
+                })
+                
             });
         }
 
         $rootScope.$on(AUTH_EVENTS.notAuthenticated, function () {
+            toaster.clear(waitToastId, waitToastId);
+
+            toaster.pop(errorToasterOptions);
+
             that.errorMessage = 'The email or password you entered is incorrect.';
         });
 

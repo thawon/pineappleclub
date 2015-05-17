@@ -4,7 +4,8 @@ describe('Unit: ApplicationController', function () {
 
     beforeEach(module('pineappleclub.application'));
 
-    var createController, rootScope, $q, ngProgressMock, AuthServiceMock, UserServiceMock;
+    var createController, rootScope, $q, ngProgressMock, AuthServiceMock,
+        UserServiceMock, UserProfileServiceMock;
 
     beforeEach(inject(function ($controller, $rootScope, _$q_, AppConfigurationService) {
         rootScope = $rootScope;
@@ -23,12 +24,17 @@ describe('Unit: ApplicationController', function () {
             setCurrentUser: function (user) { }
         };
 
+        UserProfileServiceMock = {
+            getUser: function (id) { }
+        };
+
         createController = function () {
             return $controller('ApplicationController', {
                 ngProgress: ngProgressMock,
                 AppConfigurationService: AppConfigurationService,
                 AuthService: AuthServiceMock,
-                UserService: UserServiceMock
+                UserService: UserServiceMock,
+                UserProfileService: UserProfileServiceMock
             });
         };
         
@@ -36,28 +42,40 @@ describe('Unit: ApplicationController', function () {
 
     it('check authentication when application starts',
     function () {
-        var user = {},
+        var user = {
+                _id: 1
+            },
             controller;
 
         spyOn(AuthServiceMock, 'authenticated').andCallFake(function () {
             var deferred = $q.defer();
 
-            deferred.resolve({ success: true });
+            deferred.resolve({ success: true, user: user });
 
             return deferred.promise;
         });
 
-        spyOn(AuthServiceMock, 'getCurrentUser').andCallFake(function () {
-            return user;
-        });
+        spyOn(UserProfileServiceMock, 'getUser').andCallFake(function () {
+            var deferred = $q.defer(),
+                user = {
+                    _id: 1,
+                    firstname: "valid first name",
+                    lastname: 'lastname_valid'
+                };
 
+            deferred.resolve(user);
+
+            return deferred.promise;
+        });
+        
         controller = createController();
 
-        spyOn(controller, 'setCurrentUser');
+        spyOn(UserServiceMock, 'setCurrentUser');
 
         rootScope.$apply();
 
-        expect(controller.setCurrentUser).toHaveBeenCalledWith(user);
+        expect(UserServiceMock.setCurrentUser).toHaveBeenCalledWith(user);
+        expect(UserProfileServiceMock.getUser).toHaveBeenCalledWith(user._id);
     });
 
     it('check authentication when application starts, user is not authenticated',
@@ -74,10 +92,12 @@ describe('Unit: ApplicationController', function () {
 
         controller = createController();
 
-        spyOn(controller, 'setCurrentUser');
+        spyOn(UserServiceMock, 'setCurrentUser');
+        spyOn(UserProfileServiceMock, 'getUser');
 
         rootScope.$apply();
 
-        expect(controller.setCurrentUser).not.toHaveBeenCalled();
+        expect(UserServiceMock.setCurrentUser).not.toHaveBeenCalled();
+        expect(UserProfileServiceMock.getUser).not.toHaveBeenCalled();
     });
 });

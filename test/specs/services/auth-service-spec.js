@@ -23,12 +23,11 @@
     it('user logins',
     function () {
         var credentials = {
-            email: 'tester@unittest.com.au',
-            password: 'password'
-        },
+                email: 'tester@unittest.com.au',
+                password: 'password'
+            },
             user = {
-                email: credentials.email,
-                password: credentials.password,
+                id: 1,                
                 userRole: 'admin'
             },
             url = 'api/login';

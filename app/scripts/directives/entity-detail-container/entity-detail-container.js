@@ -21,12 +21,14 @@
             transclude: true,
             scope: {
                 saveFn: '&',
-                failFn: '&'
+                validateFn: '&',
+                cancelFn: '&'
             },
             link: function (scope, element, attrs) {
+                var errorDiv = element.find('.view-detail-error');
 
                 scope.edit = changeMode(VIEW_MODES.edit);
-                scope.cancel = changeMode(VIEW_MODES.show);
+                scope.cancel = cancel;
 
                 scope.save = save(afterSave);
 
@@ -92,6 +94,19 @@
                                 type: 'error',
                                 body: 'saved unsuccessfully'
                             };
+                        
+                        var error = scope.validateFn();
+
+                        if (error.hasError) {
+
+                            toaster.pop(errorToasterOptions);
+
+                            showErrorMessage(error.Errors);
+
+                            return;
+                        }
+
+                        errorDiv.html('');
 
                         toaster.pop(waitToasterOptions);
 
@@ -110,12 +125,22 @@
 
                                 toaster.pop(errorToasterOptions);
                                 
-                                // not sure why i need to the function like this ()(error)
-                                scope.failFn()(error);
+                                console.log(error);
 
                                 return error;
                             });
                     }
+                }
+
+                function cancel() {
+                    scope.cancelFn();
+                    changeMode(VIEW_MODES.show)();
+                }
+
+                function showErrorMessage(errors) {
+                    var message = errors.join('</br>');
+
+                    errorDiv.html(message);
                 }
 
             },

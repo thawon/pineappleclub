@@ -1,17 +1,16 @@
 ﻿'use strict';
 
 describe('Unit: LoingController', function () {
+    
+    var createController, controller, $rootScope, rootScope, $q, AuthServiceMock, UserProfileServiceMock,
+        StateServiceMock, UserServiceMock, AUTH_EVENTS, toasterMock;
 
-    beforeEach(module('pineappleclub.login'));
+    beforeEach(module('breeze.angular', 'pineappleclub.login'));
 
-    var createController, controller, $rootScope, rootScope, cookieStore, $q, AuthServiceMock,
-        StateServiceMock, UserServiceMock, AUTH_EVENTS;
-
-    beforeEach(inject(function ($controller, _$rootScope_, _$q_, _$cookieStore_, _AUTH_EVENTS_, STRING) {
+    beforeEach(inject(function (breeze, $controller, _$rootScope_, _$q_, _AUTH_EVENTS_, STRING) {
         $q = _$q_;
         $rootScope = _$rootScope_;
 
-        cookieStore = _$cookieStore_;
         AUTH_EVENTS = _AUTH_EVENTS_;
         
         StateServiceMock = {
@@ -28,25 +27,39 @@ describe('Unit: LoingController', function () {
             setCurrentUser: function (user) { }
         };
         
+        UserProfileServiceMock = {
+            getUser: function (id) { }
+        };
+
+        toasterMock = {
+            pop: function (options) { },
+            clear: function (toastId, toasterId) { }
+        };
+
         spyOn(StateServiceMock, "changeState");
         spyOn(UserServiceMock, "setCurrentUser");
 
         createController = function () {
             return $controller("LoginController", {
-                $rootScope: rootScope,
-                $cookieStore: cookieStore,                
+                $rootScope: rootScope,              
                 AuthService: AuthServiceMock,
                 StateService: StateServiceMock,
                 UserService: UserServiceMock,
                 AUTH_EVENTS: AUTH_EVENTS,
-                STRING: STRING
+                STRING: STRING,
+                UserProfileService: UserProfileServiceMock,
+                toaster: toasterMock
             });
         };
     }));
 
     it("user logins successfully",
     function () {
-        var user = {};
+        var user = {
+            _id: 1,
+            firstname: "valid first name",
+            lastname: 'lastname_valid'
+        };
         rootScope = $rootScope.$new();
 
         spyOn(rootScope, "$broadcast");
@@ -54,13 +67,17 @@ describe('Unit: LoingController', function () {
         spyOn(AuthServiceMock, "login").andCallFake(function () {
             var deferred = $q.defer();
 
-            deferred.resolve({ success: true });
+            deferred.resolve(user);
 
             return deferred.promise;
         });
 
-        spyOn(AuthServiceMock, "getCurrentUser").andCallFake(function () {
-            return user;
+        spyOn(UserProfileServiceMock, "getUser").andCallFake(function () {
+            var deferred = $q.defer();
+
+            deferred.resolve(user);
+
+            return deferred.promise;
         });
 
         controller = createController();
@@ -68,8 +85,10 @@ describe('Unit: LoingController', function () {
         controller.login();
 
         rootScope.$apply();
-
+                
+        expect(UserProfileServiceMock.getUser).toHaveBeenCalledWith(user._id);
         expect(UserServiceMock.setCurrentUser).toHaveBeenCalledWith(user);
+
         expect(rootScope.$broadcast).toHaveBeenCalledWith(AUTH_EVENTS.loginSuccess);
 
         expect(StateServiceMock.changeState).toHaveBeenCalledWith("dashboard");

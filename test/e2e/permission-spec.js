@@ -12,7 +12,7 @@ describe('permission', function () {
         httpBackendMock.add([
             {
                 method: 'POST',
-                url: '/authenticated',
+                url: 'api/authenticated',
                 header: 200,
                 response: {
                     success: false
@@ -28,27 +28,37 @@ describe('permission', function () {
     it('admin-pages are accessible when user is authenticated', function () {        
         
         httpBackendMock.add([
-           {
-               method: 'POST',
-               url: '/authenticated',
-               header: 200,
-               response: {
-                   success: true,
-                   user: {
-                       local: {
-                           email: 'email@valid.com',
-                           firstname: 'firstname_valid',
-                           lastname: 'lastname_valid',
-                           userRole: 'admin'
-                       }
-                   }
-               }
-           }
+            {
+                method: 'POST',
+                url: 'api/authenticated',
+                header: 200,
+                response: {
+                    success: true,
+                    user: {
+                        _id: 1,
+                        email: 'email@valid.com',
+                        firstname: 'firstname_valid',
+                        lastname: 'lastname_valid',
+                        userRole: 'admin'
+                    }
+                }
+            },
+            {
+                method: 'GET',
+                url: "api/Users?$filter=_id%20eq%20'1'&",
+                header: 200,
+                response: {
+                    _id: 1,
+                    firstname: "valid first name",
+                    lastname: 'lastname_valid'
+                }
+            }
         ]);
 
         browser.get('/dashboard');
 
         expect(browser.getCurrentUrl()).toContain('dashboard');
+
     });
 
     it('admin-pages are accessible after user logins', function () {
@@ -56,7 +66,7 @@ describe('permission', function () {
         httpBackendMock.add([
             {
                 method: 'POST',
-                url: '/authenticated',
+                url: 'api/authenticated',
                 header: 200,
                 response: {
                     success: false
@@ -64,18 +74,27 @@ describe('permission', function () {
             },
             {
                 method: 'POST',
-                url: '/login',
+                url: 'api/login',
                 header: 200,
                 response: {
                     success: true,
                     user: {
-                        local: {
-                            email: 'email@valid.com',
-                            firstname: 'firstname_valid',
-                            lastname: 'lastname_valid',
-                            userRole: 'admin'
-                        }
+                        _id: 1,
+                        email: 'email@valid.com',
+                        firstname: 'firstname_valid',
+                        lastname: 'lastname_valid',
+                        userRole: 'admin'
                     }
+                }
+            },
+            {
+                method: 'GET',
+                url: "api/Users?$filter=_id%20eq%20'1'&",
+                header: 200,
+                response: {
+                    _id: 1,
+                    firstname: "valid first name",
+                    lastname: 'lastname_valid'
                 }
             }
         ]);

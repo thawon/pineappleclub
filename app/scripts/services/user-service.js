@@ -8,6 +8,8 @@
     UserService.$inject = [];
 
     function UserService() {
+
+        // current user stores breeze user entity
         var currentUser,
             userService = {
             getCurrentUser: function () {

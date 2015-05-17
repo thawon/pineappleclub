@@ -25,6 +25,7 @@ module.exports = function(config) {
         "app/scripts/vendors/angular-cookies.min.js",
         "app/scripts/vendors/angular-resource.min.js",
         "app/scripts/vendors/ngProgress.min.js",
+        "app/scripts/vendors/toaster.js",
 
         "app/scripts/vendors/breeze.debug.js",
         "app/scripts/vendors/breeze.dataService.mongo.js",
@@ -38,7 +39,6 @@ module.exports = function(config) {
         "app/scripts/constants/*.js",
         
         "test/specs/**/*.js",
-        
     ],
 
     // list of files / patterns to exclude

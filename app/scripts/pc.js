@@ -21,6 +21,7 @@
         'pineappleclub.dashboard',
         'pineappleclub.login',
         'pineappleclub.user-profile',
+        'pineappleclub.user-profile-list',
         'pineappleclub.authorisation-constant',
         'pineappleclub.state-change-service',
         'pineappleclub.auth-interceptor-service'
@@ -71,37 +72,47 @@
         'pineappleclub.app-configuration-service',
         'pineappleclub.auth-service',
         'pineappleclub.user-service',
-        'pineappleclub.auth-events-constant'
+        'pineappleclub.user-profile-service'
     ])
     .controller('ApplicationController', ApplicationController);
 
     ApplicationController.$inject = [
-        '$rootScope',
         'ngProgress',
         'AppConfigurationService',
         'AuthService',
         'UserService',
-        'AUTH_EVENTS'
+        'UserProfileService'
     ];
 
-    function ApplicationController($rootScope, ngProgress, AppConfigurationService,
-        AuthService, UserService, AUTH_EVENTS) {
+    function ApplicationController(ngProgress, AppConfigurationService,
+        AuthService, UserService, UserProfileService) {
 
         var that = this;
-
-        that.setCurrentUser = function (user) {
-            UserService.setCurrentUser(user);
-        }
-
+        
         // setting progress bar color
         ngProgress.color(AppConfigurationService.progress.color);
 
         // check if the user are still logged in from last session.
         AuthService.authenticated()
         .then(function (data) {
-            if (data.success) {
-                that.setCurrentUser(AuthService.getCurrentUser());
-            }
+            var user;
+
+            if (!data.success)
+                return;
+
+            user = data.user;
+
+            // set current user for now so that dashboard can use user-role to verify the page permission
+            UserService.setCurrentUser(user);
+
+            // fetch using breezejs manager so the entity is added to the graph            
+            UserProfileService.getUser(user._id)
+            .then(function (user) {
+
+                // current user is user entity, not a plain javascript object
+                UserService.setCurrentUser(user);
+            })
+
         });
 
     }
@@ -303,29 +314,46 @@
     'use strict';
 
     angular.module('pineappleclub.login', [
-        'ngCookies',
         'pineappleclub.auth-service',
         'pineappleclub.state-service',
         'pineappleclub.user-service',
         'pineappleclub.auth-events-constant',
-        'pineappleclub.string-constant'
+        'pineappleclub.string-constant',
+        'pineappleclub.user-profile-service'
     ])
         .controller('LoginController', LoginController);
 
     LoginController.$inject = [
         '$rootScope', 
-        '$cookieStore',
         'AuthService',
         'StateService',
         'UserService',
         'AUTH_EVENTS',
-        'STRING'
+        'STRING',
+        'UserProfileService',
+        'toaster'
     ];
 
-    function LoginController($rootScope, $cookieStore, AuthService,
-        StateService, UserService, AUTH_EVENTS, STRING) {
+    function LoginController($rootScope, AuthService, StateService,
+        UserService, AUTH_EVENTS, STRING, UserProfileService, toaster) {
         
-        var that = this;
+        var that = this,
+            waitToastId = 'waitingId',
+            successtoasterOptions = {
+                type: 'success',
+                body: 'logged in successfully',
+                timeout: 2000
+            },
+            waitToasterOptions = {
+                type: 'wait',
+                body: 'logging in...',
+                toastId: waitToastId,
+                toasterId: waitToastId
+            },
+            errorToasterOptions = {
+                type: 'error',
+                body: 'logged in unsuccessfully'
+            };
 
         that.credentials = {
             email: STRING.empty,
@@ -335,19 +363,36 @@
         that.errorMessage = null;
 
         that.login = function (credentials) {
+
             AuthService.login(credentials)
-            .then(function (res) {
-                var user = AuthService.getCurrentUser();
+            .then(function (user) {
 
-                UserService.setCurrentUser(user);
+                toaster.pop(waitToasterOptions);
 
-                $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+                // fetch using breezejs manager so the entity is added to the graph            
+                UserProfileService.getUser(user._id)
+                .then(function (user) {
 
-                goDashboard();
+                    toaster.clear(waitToastId, waitToastId);
+
+                    // current user is user entity, not a plain javascript object
+                    UserService.setCurrentUser(user);
+
+                    $rootScope.$broadcast(AUTH_EVENTS.loginSuccess);
+
+                    goDashboard();
+
+                    toaster.pop(successtoasterOptions);
+                })
+                
             });
         }
 
         $rootScope.$on(AUTH_EVENTS.notAuthenticated, function () {
+            toaster.clear(waitToastId, waitToastId);
+
+            toaster.pop(errorToasterOptions);
+
             that.errorMessage = 'The email or password you entered is incorrect.';
         });
 
@@ -497,6 +542,22 @@
 
     'use strict';
 
+    angular.module('pineappleclub.user-profile-list', [])
+    .controller('UserProfileListController', UserProfileListController);
+
+    UserProfileListController.$inject = [];
+
+    function UserProfileListController() {
+        var that = this;
+
+       
+    }
+
+}());
+(function () {
+
+    'use strict';
+
     angular.module('pineappleclub.user-model', [
         'pineappleclub.util-service'
     ])
@@ -515,10 +576,11 @@
                         name: 'User',
                         dataProperties: {
                             id: { type: type.MongoObjectId },
-                            firstname: { required: true, max: 10 },
+                            firstname: { required: true, max: 50 },
                             lastname: { required: true, max: 50 },
                             userRole: { required: true, max: 10 },
-                            lastLoggedInDateTime: { type: type.DateTime }
+                            lastLoggedInDateTime: { type: type.DateTime },
+                            email: { required: true, max: 255 }
                         }
                     };
                 }
@@ -587,29 +649,31 @@
     ];
 
     function UserProfileController(UserProfileService, DataService, UserService) {
-        var that = this,
-            currentUser = UserService.getCurrentUser();
+        var that = this;
 
-        that.user = null;
-
-        UserProfileService.getUser(currentUser._id)
-            .then(function (user) {
-                that.user = user;
-            });
+        that.user = UserService.getCurrentUser();
 
         that.save = DataService.saveChanges();
-        that.fail = function (error) {
-            var x;
-            x = 1;
+
+        that.validate = validate;
+
+        that.cancel = cancel;
+
+        function validate() {
+            var user = that.user,
+                errors = user.entityAspect.getValidationErrors(),
+                result = {
+                    hasError: (errors.length > 0) ? true : false,
+                    Errors: _.pluck(errors, 'errorMessage')
+                };
+
+            return result;
         }
 
-        that.updateFnB = function () {
-            console.log('B save here.');
-        };
+        function cancel() {
+            that.user.entityAspect.rejectChanges();
+        }
 
-        that.saveXX = function () {
-            console.log('save here.');
-        };
     }
 
 }());
@@ -768,6 +832,21 @@
                         }
                     },
                     icon: '/images/user-profile.png'
+                },
+                {
+                    name: 'user-profile-list',
+                    display: 'Users',
+                    url: '/user-profile-list',
+                    templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
+                    controller: 'UserProfileListController as userProfileList',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin],
+                        page: {
+                            title: 'Users',
+                            description: 'List of users'
+                        }
+                    },
+                    icon: '/images/user-profile-list.png'
                 }
             ]
     };
@@ -875,12 +954,14 @@
             transclude: true,
             scope: {
                 saveFn: '&',
-                failFn: '&'
+                validateFn: '&',
+                cancelFn: '&'
             },
             link: function (scope, element, attrs) {
+                var errorDiv = element.find('.view-detail-error');
 
                 scope.edit = changeMode(VIEW_MODES.edit);
-                scope.cancel = changeMode(VIEW_MODES.show);
+                scope.cancel = cancel;
 
                 scope.save = save(afterSave);
 
@@ -946,6 +1027,19 @@
                                 type: 'error',
                                 body: 'saved unsuccessfully'
                             };
+                        
+                        var error = scope.validateFn();
+
+                        if (error.hasError) {
+
+                            toaster.pop(errorToasterOptions);
+
+                            showErrorMessage(error.Errors);
+
+                            return;
+                        }
+
+                        errorDiv.html('');
 
                         toaster.pop(waitToasterOptions);
 
@@ -964,12 +1058,22 @@
 
                                 toaster.pop(errorToasterOptions);
                                 
-                                // not sure why i need to the function like this ()(error)
-                                scope.failFn()(error);
+                                console.log(error);
 
                                 return error;
                             });
                     }
+                }
+
+                function cancel() {
+                    scope.cancelFn();
+                    changeMode(VIEW_MODES.show)();
+                }
+
+                function showErrorMessage(errors) {
+                    var message = errors.join('</br>');
+
+                    errorDiv.html(message);
                 }
 
             },
@@ -995,7 +1099,7 @@
             scope: {},
             link: function (scope, element, attrs) {
 
-                scope.expandable = "/images/expand.png";
+                scope.expandable = "/images/collapse.png";
                 element.find(".exp-header").html(attrs.header);
 
                 scope.toggle = function () {
@@ -1190,7 +1294,12 @@
         return authService;
         
         function setCurrentUser(user) {
-            CookieService.setCookie('user', user);
+            var cookie = {
+                id: user.id,
+                userRole: user.userRole
+            };
+
+            CookieService.setCookie('user', cookie);
         }
 
         function login(credentials) {
@@ -1198,11 +1307,10 @@
                 .then(function (res) {
                     var data = res.data;
 
-                    if (data.success) {
-                        setCurrentUser(data.user);
-                    }
+                    setCurrentUser(data.user);
 
-                    return data;
+                    return data.user;
+
                 });
         };
 
@@ -1226,6 +1334,7 @@
             return $http.post(serviceName('/authenticated'))
                 .then(function (res) {
                     var data = res.data;
+
                     if (data.success) {
                         setCurrentUser(data.user);
                     }
@@ -1688,6 +1797,8 @@
     UserService.$inject = [];
 
     function UserService() {
+
+        // current user stores breeze user entity
         var currentUser,
             userService = {
             getCurrentUser: function () {

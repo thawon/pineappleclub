@@ -2,7 +2,7 @@
     <h2>Profile</h2>
 
     <pcd-expandable-container data-header="Personal Details">
-        <pcd-entity-detail-container save-fn="userProfile.save()" fail-fn="userProfile.fail">
+        <pcd-entity-detail-container save-fn="userProfile.save()" cancel-fn="userProfile.cancel()" validate-fn="userProfile.validate()">
             <div data-detail default data-mode="show">
                 <table class="table-views">
                     <thead>
@@ -24,36 +24,14 @@
             </div>
             <div data-detail data-mode="edit">
                 <div>
-                    <label class="label-input">First name</label>
-                    <input type="text" ng-model="userProfile.user.firstname" class="input-text-default">
-                    <label class="label-input">Last name</label>
-                    <input type="text" ng-model="userProfile.user.lastname" class="input-text-default">
-                </div>
-            </div>
-        </pcd-entity-detail-container>
-    </pcd-expandable-container>
-        
-    <pcd-expandable-container data-header="Login">
-        <pcd-entity-detail-container save-fn="userProfile.updateFnB()">
-            <div data-detail default data-mode="show">
-                <table class="table-views">
-                    <thead>
-                        <tr>
-                            <th class="table-views-thead-tr"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="label-inline">Email:</td>
-                            <td class="label-inline"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div data-detail data-mode="edit">
-                <div>
-                    <label class="label-block">Email</label>
-                    <input type="text" class="input-text-default">
+                    <div>
+                        <label class="label-input">First name</label>
+                        <input type="text" ng-model="userProfile.user.firstname" class="input-text-default">
+                    </div>
+                    <div>
+                        <label class="label-input">Last name</label>
+                        <input type="text" ng-model="userProfile.user.lastname" class="input-text-default">
+                    </div>
                 </div>
             </div>
         </pcd-entity-detail-container>

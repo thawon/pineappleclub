@@ -18,29 +18,31 @@
     ];
 
     function UserProfileController(UserProfileService, DataService, UserService) {
-        var that = this,
-            currentUser = UserService.getCurrentUser();
+        var that = this;
 
-        that.user = null;
-
-        UserProfileService.getUser(currentUser._id)
-            .then(function (user) {
-                that.user = user;
-            });
+        that.user = UserService.getCurrentUser();
 
         that.save = DataService.saveChanges();
-        that.fail = function (error) {
-            var x;
-            x = 1;
+
+        that.validate = validate;
+
+        that.cancel = cancel;
+
+        function validate() {
+            var user = that.user,
+                errors = user.entityAspect.getValidationErrors(),
+                result = {
+                    hasError: (errors.length > 0) ? true : false,
+                    Errors: _.pluck(errors, 'errorMessage')
+                };
+
+            return result;
         }
 
-        that.updateFnB = function () {
-            console.log('B save here.');
-        };
+        function cancel() {
+            that.user.entityAspect.rejectChanges();
+        }
 
-        that.saveXX = function () {
-            console.log('save here.');
-        };
     }
 
 }());

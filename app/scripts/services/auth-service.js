@@ -30,7 +30,12 @@
         return authService;
         
         function setCurrentUser(user) {
-            CookieService.setCookie('user', user);
+            var cookie = {
+                id: user.id,
+                userRole: user.userRole
+            };
+
+            CookieService.setCookie('user', cookie);
         }
 
         function login(credentials) {
@@ -38,11 +43,10 @@
                 .then(function (res) {
                     var data = res.data;
 
-                    if (data.success) {
-                        setCurrentUser(data.user);
-                    }
+                    setCurrentUser(data.user);
 
-                    return data;
+                    return data.user;
+
                 });
         };
 
@@ -66,6 +70,7 @@
             return $http.post(serviceName('/authenticated'))
                 .then(function (res) {
                     var data = res.data;
+
                     if (data.success) {
                         setCurrentUser(data.user);
                     }

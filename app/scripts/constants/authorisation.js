@@ -134,6 +134,21 @@
                         }
                     },
                     icon: '/images/user-profile.png'
+                },
+                {
+                    name: 'user-profile-list',
+                    display: 'Users',
+                    url: '/user-profile-list',
+                    templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
+                    controller: 'UserProfileListController as userProfileList',
+                    data: {
+                        authorizedRoles: [USER_ROLES.admin],
+                        page: {
+                            title: 'Users',
+                            description: 'List of users'
+                        }
+                    },
+                    icon: '/images/user-profile-list.png'
                 }
             ]
     };

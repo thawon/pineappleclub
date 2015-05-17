@@ -21,6 +21,7 @@
         'pineappleclub.dashboard',
         'pineappleclub.login',
         'pineappleclub.user-profile',
+        'pineappleclub.user-profile-list',
         'pineappleclub.authorisation-constant',
         'pineappleclub.state-change-service',
         'pineappleclub.auth-interceptor-service'

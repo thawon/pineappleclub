@@ -15,7 +15,7 @@
             scope: {},
             link: function (scope, element, attrs) {
 
-                scope.expandable = "/images/expand.png";
+                scope.expandable = "/images/collapse.png";
                 element.find(".exp-header").html(attrs.header);
 
                 scope.toggle = function () {
