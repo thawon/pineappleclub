@@ -9,43 +9,19 @@
         <button class="btn btn-sm btn-primary" ng-click="search()">Search</button>
     </div>
 
-    <div style="border-bottom: 1px solid #cccccc; color:#808080; min-height:60px; padding:8px 5px 8px 5px;">
-       <div style="width:100%; max-width:400px;">
-           <span>Mui Faktang</span>
-           
-       <span style="font-size:12px;float:right;">admin</span></div>
-        <span style="font-size:12px;">Last logged in: 15/05/2015 15:00</span>
+    <div dir-paginate="user in userProfileList.users | itemsPerPage: 2" 
+         total-items="userProfileList.totalUsers" 
+         current-page="userProfileList.pagination.current" 
+         class="user-profile-list-item">
+
+        <div class="user-profile-list-name-div">
+            <span ng-bind="user.fullname"></span>
+            <span ng-bind="user.userRole" class="user-profile-list-admin"></span>
+        </div>
+        <span class="user-profile-list-logged-in-span">
+            Last logged in: {{user.lastLoggedInDateTime | date:'MMMM dd yyyy, HH:mm'}}
+        </span>
     </div>
 
-    <div style="border-bottom: 1px solid #cccccc; color:#808080; min-height:60px; padding:8px 5px 8px 5px;">
-       <div style="width:100%; max-width:400px;">
-           <span>Alan Green</span>
-           
-       <span style="font-size:12px;float:right;">parent</span></div>
-        <span style="font-size:12px;">Last logged in: 15/05/2015 15:00</span>
-    </div>
-
-    <div style="border-bottom: 1px solid #cccccc; color:#808080; min-height:60px; padding:8px 5px 8px 5px;">
-       <div style="width:100%; max-width:400px;">
-           <span>Joe Smith</span>
-           
-       <span style="font-size:12px;float:right;">admin</span></div>
-        <span style="font-size:12px;">Last logged in: 15/05/2015 15:00</span>
-    </div>
-
-    <div style="border-bottom: 1px solid #cccccc; color:#808080; min-height:60px; padding:8px 5px 8px 5px;">
-       <div style="width:100%; max-width:400px;">
-           <span>Jackson Black</span>
-           
-       <span style="font-size:12px;float:right;">parent</span></div>
-        <span style="font-size:12px;">Last logged in: 15/05/2015 15:00</span>
-    </div>
-
-    <div style="border-bottom: 1px solid #cccccc; color:#808080; min-height:60px; padding:8px 5px 8px 5px;">
-       <div style="width:100%; max-width:400px;">
-           <span>Black Pool</span>
-           
-       <span style="font-size:12px;float:right;">educator</span></div>
-        <span style="font-size:12px;">Last logged in: 15/05/2015 15:00</span>
-    </div>
+    <dir-pagination-controls on-page-change="userProfileList.pageChanged(newPageNumber)"></dir-pagination-controls>
 </div>

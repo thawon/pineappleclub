@@ -9,6 +9,7 @@
         'ngProgress',
         'ngCookies',
         'toaster',
+        'angularUtils.directives.dirPagination',
         'pineappleclub.application',
         'pineappleclub.home',
         'pineappleclub.navigator',

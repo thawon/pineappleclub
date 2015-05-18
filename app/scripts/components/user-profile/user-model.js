@@ -24,7 +24,8 @@
                             lastname: { required: true, max: 50 },
                             userRole: { required: true, max: 10 },
                             lastLoggedInDateTime: { type: type.DateTime },
-                            email: { required: true, max: 255 }
+                            email: { required: true, max: 255 },
+                            account_id: { type: type.MongoObjectId }
                         }
                     };
                 }
