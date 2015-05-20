@@ -22,7 +22,8 @@
             scope: {
                 saveFn: '&',
                 validateFn: '&',
-                cancelFn: '&'
+                cancelFn: '&',
+                modeFn: '&'
             },
             link: function (scope, element, attrs) {
                 var errorDiv = element.find('.view-detail-error');
@@ -33,8 +34,8 @@
                 scope.save = save(afterSave);
 
                 scope.saveAndClose = save(afterSaveAndClose);
-
-                showDefaultView();
+                
+                changeMode(scope.modeFn())();
 
                 function afterSave() {
                     changeMode(VIEW_MODES.show)();
@@ -62,17 +63,6 @@
 
                         scope.mode = mode;
                     }
-                }
-
-                function showDefaultView() {
-                    var $this = $(element),
-                        views = getViews(),
-                        view = $this.find('.view-detail').find('[default]');
-
-                    views.hide();
-                    view.show();
-
-                    scope.mode = $(view).attr('data-mode');
                 }
 
                 function save(after) {

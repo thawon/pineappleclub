@@ -16,7 +16,9 @@
 
         that.users = null;
         that.totalUsers = 0;
-        that.usersPerPage = 25; // this should match however many results your API puts on one page
+        // this should match however many results your API puts on one page
+        that.usersPerPage = 25;
+
         getResultsPage(1);
 
         that.pagination = {

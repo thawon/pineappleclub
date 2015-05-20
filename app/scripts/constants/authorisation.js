@@ -123,7 +123,7 @@
                 {
                     name: 'user-profile',
                     display: 'My Profile',
-                    url: '/user-profile',
+                    url: '/user-profile/:userId?mode',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as userProfile',
                     data: {

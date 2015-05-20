@@ -2,8 +2,8 @@
     <h2>Profile</h2>
 
     <pcd-expandable-container data-header="Personal Details">
-        <pcd-entity-detail-container save-fn="userProfile.save()" cancel-fn="userProfile.cancel()" validate-fn="userProfile.validate()">
-            <div data-detail default data-mode="show">
+        <pcd-entity-detail-container save-fn="userProfile.save()" cancel-fn="userProfile.cancel()" validate-fn="userProfile.validate()" mode-fn="userProfile.mode()">
+            <div data-detail data-mode="show">
                 <table class="table-views">
                     <thead>
                         <tr class="table-views-thead-tr">
