@@ -148,26 +148,42 @@
 
     angular.module('pineappleclub.dashboard', [
         'pineappleclub.authorisation-constant',
+        'pineappleclub.view-modes-constant',
         'pineappleclub.user-service'
     ])
     .controller('DashboardController', DashboardController);
 
     DashboardController.$inject = [
         'AUTHORISATION',
+        'VIEW_MODES',
         'UserService'
     ];
 
-    function DashboardController(AUTHORISATION, UserService) {
+    function DashboardController(AUTHORISATION, VIEW_MODES, UserService) {
         var that = this,
-            states, currentUser;
+            states, userProfileState, userProfilestateParams;
 
         that.currentUser = UserService.getCurrentUser();
 
         states = _.filter(AUTHORISATION.STATES.states,
             function (state) {
                 return (state.data.authorizedRoles.indexOf(that.currentUser.userRole) !== -1)
-                        && state.name !== 'dashboard';
+                        && state.name !== 'dashboard'
+                        && state.name !== 'user-profile';
             });
+
+        userProfileState = _.clone(_.first(_.filter(AUTHORISATION.STATES.states,
+            function (state) {
+                return (state.name == 'user-profile');
+            })));
+        
+        states.unshift(userProfileState);
+
+        userProfilestateParams = {
+            userId: that.currentUser._id,
+            mode: VIEW_MODES.show
+        };
+        userProfileState.name += '(' + JSON.stringify(userProfilestateParams) + ')';
 
         that.states = states;
     }
@@ -544,15 +560,17 @@
     'use strict';
 
     angular.module('pineappleclub.user-profile-list-service', [
-        'pineappleclub.entity-manager-factory'
+        'pineappleclub.entity-manager-factory',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('UserProfileListService', UserProfileListService);
 
     UserProfileListService.$inject = [
-        'EntityManagerFactory'        
+        'EntityManagerFactory',
+        'AppConfigurationService'
     ];
 
-    function UserProfileListService(EntityManagerFactory, UserService) {
+    function UserProfileListService(EntityManagerFactory, AppConfigurationService) {
         var manager = EntityManagerFactory.getManager(),
             userProfileListService = {
                 getUsers: getUsers
@@ -561,10 +579,11 @@
         return userProfileListService;
 
         function getUsers(accountId, pageNumber) {
-            var query = breeze.EntityQuery.from('Users')
+            var pagination = AppConfigurationService.pagination,
+                query = breeze.EntityQuery.from('Users')
                         .where('account_id', '==', accountId)
-                        .skip(2 * (pageNumber - 1))
-                        .take(2)
+                        .skip(pagination.itemsPerPage * (pageNumber - 1))
+                        .take(pagination.itemsPerPage)
                         .inlineCount();
 
             return manager.executeQuery(query)
@@ -585,36 +604,66 @@
     'use strict';
 
     angular.module('pineappleclub.user-profile-list', [
-        'pineappleclub.user-profile-list-service'
+        'pineappleclub.user-profile-list-service',
+        'pineappleclub.user-service',
+        'pineappleclub.app-configuration-service',
+        'pineappleclub.state-service',
+        'pineappleclub.view-modes-constant'
     ])
     .controller('UserProfileListController', UserProfileListController);
 
     UserProfileListController.$inject = [
-        'UserProfileListService'
+        'UserProfileListService',
+        'UserService',
+        'AppConfigurationService',
+        'StateService',
+        'VIEW_MODES'
     ];
 
-    function UserProfileListController(UserProfileListService) {
-        var that = this;
+    function UserProfileListController(UserProfileListService,
+        UserService, AppConfigurationService, StateService, VIEW_MODES) {
+
+        var that = this,
+            pagination = AppConfigurationService.pagination,
+            defaultPageNumber = 1;
+
+        that.account_id = UserService.getCurrentUser().account_id;
 
         that.users = null;
+
+        that.itemsPerPage = pagination.itemsPerPage;
         that.totalUsers = 0;
-        that.usersPerPage = 25; // this should match however many results your API puts on one page
-        getResultsPage(1);
+        
+        getResultsPage(defaultPageNumber);
 
         that.pagination = {
-            current: 1
+            current: defaultPageNumber
         };
 
         that.pageChanged = function (newPage) {
             getResultsPage(newPage);
         };
 
+        that.showDetails = showDetails;
+
         function getResultsPage(pageNumber) {
-            UserProfileListService.getUsers('5557c029ce48f30d543cbfc6', pageNumber)
+            var currentUser = UserService.getCurrentUser();
+
+            UserProfileListService.getUsers(that.account_id, pageNumber)
             .then(function (data) {
                 that.users = data.results;
                 that.totalUsers = data.inlineCount;
             });
+        }
+
+        function showDetails(user) {            
+            var state = 'user-profile',
+                params = {
+                    userId: user.id,
+                    mode: VIEW_MODES.show
+                };
+
+            StateService.changeState(state, params);
         }
     }
 
@@ -704,26 +753,37 @@
         'pineappleclub.expandable-container',
         'pineappleclub.user-profile-service',
         'pineappleclub.data-service',
-        'pineappleclub.user-service'
+        'pineappleclub.user-service',
+        'pineappleclub.view-modes-constant'
     ])
     .controller('UserProfileController', UserProfileController);
 
     UserProfileController.$inject = [
+        '$stateParams',
         'UserProfileService',
         'DataService',
-        'UserService'
+        'UserService',
+        'VIEW_MODES'
     ];
 
-    function UserProfileController(UserProfileService, DataService, UserService) {
-        var that = this;
+    function UserProfileController($stateParams, UserProfileService, DataService,
+        UserService, VIEW_MODES) {
 
-        that.user = UserService.getCurrentUser();
+        var that = this,
+            id = $stateParams.userId;
+
+        that.user = null;
 
         that.save = DataService.saveChanges();
-
         that.validate = validate;
-
         that.cancel = cancel;
+        that.mode = mode;        
+                
+        UserProfileService.getUser(id).then(getUserSuccess);
+
+        function getUserSuccess(user) {
+            that.user = user;
+        }
 
         function validate() {
             var user = that.user,
@@ -740,6 +800,9 @@
             that.user.entityAspect.rejectChanges();
         }
 
+        function mode() {
+            return $stateParams.mode;
+        }
     }
 
 }());
@@ -887,7 +950,7 @@
                 {
                     name: 'user-profile',
                     display: 'My Profile',
-                    url: '/user-profile',
+                    url: '/user-profile/:userId?mode',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as userProfile',
                     data: {
@@ -958,8 +1021,9 @@
     'use strict';
 
     var VIEW_MODES = {
-        show: "show",
-        edit: "edit"
+        show: 'show',
+        edit: 'edit',
+        create: 'create',
     };
 
     angular.module('pineappleclub.view-modes-constant', [])
@@ -1021,7 +1085,8 @@
             scope: {
                 saveFn: '&',
                 validateFn: '&',
-                cancelFn: '&'
+                cancelFn: '&',
+                modeFn: '&'
             },
             link: function (scope, element, attrs) {
                 var errorDiv = element.find('.view-detail-error');
@@ -1032,8 +1097,8 @@
                 scope.save = save(afterSave);
 
                 scope.saveAndClose = save(afterSaveAndClose);
-
-                showDefaultView();
+                
+                changeMode(scope.modeFn())();
 
                 function afterSave() {
                     changeMode(VIEW_MODES.show)();
@@ -1061,17 +1126,6 @@
 
                         scope.mode = mode;
                     }
-                }
-
-                function showDefaultView() {
-                    var $this = $(element),
-                        views = getViews(),
-                        view = $this.find('.view-detail').find('[default]');
-
-                    views.hide();
-                    view.show();
-
-                    scope.mode = $(view).attr('data-mode');
                 }
 
                 function save(after) {
@@ -1105,7 +1159,7 @@
                             return;
                         }
 
-                        errorDiv.html('');
+                        clearErrorMessage();
 
                         toaster.pop(waitToasterOptions);
 
@@ -1114,6 +1168,8 @@
                                 toaster.clear(waitToastId, waitToastId);
                                 
                                 toaster.pop(successtoasterOptions);
+
+                                clearErrorMessage();
 
                                 after();
 
@@ -1133,6 +1189,7 @@
 
                 function cancel() {
                     scope.cancelFn();
+                    clearErrorMessage();
                     changeMode(VIEW_MODES.show)();
                 }
 
@@ -1140,6 +1197,10 @@
                     var message = errors.join('</br>');
 
                     errorDiv.html(message);
+                }
+
+                function clearErrorMessage() {
+                    errorDiv.html('');
                 }
 
             },
@@ -1807,6 +1868,9 @@
             getServiceName: getServiceName,
             breezejs: {
                 httpTimeout: 10000
+            },
+            pagination: {
+                itemsPerPage: 4
             }
         };
 
@@ -2355,20 +2419,19 @@
 
     StateService.$inject = [
         '$location',
-        'AUTHORISATION'
+        'AUTHORISATION',
+        '$state'
     ];
 
-    function StateService($location, AUTHORISATION) {
+    function StateService($location, AUTHORISATION, $state) {
         var stateService = {
             changeState: changeState
         };
 
         return stateService;
 
-        function changeState(name) {
-            var target = _.first(_.where(AUTHORISATION.STATES.states, { name: name }));
-
-            $location.path(target.url)
+        function changeState(name, params) {
+            $state.go(name, params)
         };
     }
 
