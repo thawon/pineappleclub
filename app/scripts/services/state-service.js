@@ -9,20 +9,19 @@
 
     StateService.$inject = [
         '$location',
-        'AUTHORISATION'
+        'AUTHORISATION',
+        '$state'
     ];
 
-    function StateService($location, AUTHORISATION) {
+    function StateService($location, AUTHORISATION, $state) {
         var stateService = {
             changeState: changeState
         };
 
         return stateService;
 
-        function changeState(name) {
-            var target = _.first(_.where(AUTHORISATION.STATES.states, { name: name }));
-
-            $location.path(target.url)
+        function changeState(name, params) {
+            $state.go(name, params)
         };
     }
 

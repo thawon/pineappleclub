@@ -3,38 +3,66 @@
     'use strict';
 
     angular.module('pineappleclub.user-profile-list', [
-        'pineappleclub.user-profile-list-service'
+        'pineappleclub.user-profile-list-service',
+        'pineappleclub.user-service',
+        'pineappleclub.app-configuration-service',
+        'pineappleclub.state-service',
+        'pineappleclub.view-modes-constant'
     ])
     .controller('UserProfileListController', UserProfileListController);
 
     UserProfileListController.$inject = [
-        'UserProfileListService'
+        'UserProfileListService',
+        'UserService',
+        'AppConfigurationService',
+        'StateService',
+        'VIEW_MODES'
     ];
 
-    function UserProfileListController(UserProfileListService) {
-        var that = this;
+    function UserProfileListController(UserProfileListService,
+        UserService, AppConfigurationService, StateService, VIEW_MODES) {
+
+        var that = this,
+            pagination = AppConfigurationService.pagination,
+            defaultPageNumber = 1;
+
+        that.account_id = UserService.getCurrentUser().account_id;
 
         that.users = null;
-        that.totalUsers = 0;
-        // this should match however many results your API puts on one page
-        that.usersPerPage = 25;
 
-        getResultsPage(1);
+        that.itemsPerPage = pagination.itemsPerPage;
+        that.totalUsers = 0;
+        
+        getResultsPage(defaultPageNumber);
 
         that.pagination = {
-            current: 1
+            current: defaultPageNumber
         };
 
         that.pageChanged = function (newPage) {
             getResultsPage(newPage);
         };
 
+        that.showDetails = showDetails;
+
         function getResultsPage(pageNumber) {
-            UserProfileListService.getUsers('5557c029ce48f30d543cbfc6', pageNumber)
+            var currentUser = UserService.getCurrentUser();
+
+            UserProfileListService.getUsers(that.account_id, pageNumber)
             .then(function (data) {
                 that.users = data.results;
                 that.totalUsers = data.inlineCount;
             });
+        }
+
+        function showDetails(user) {            
+            var state = 'user-profile',
+                params = {
+                    userId: user.id,
+                    mode: VIEW_MODES.show
+                };
+
+            StateService.changeState(state, params);
         }
     }
 

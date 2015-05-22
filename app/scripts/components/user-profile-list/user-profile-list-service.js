@@ -3,15 +3,17 @@
     'use strict';
 
     angular.module('pineappleclub.user-profile-list-service', [
-        'pineappleclub.entity-manager-factory'
+        'pineappleclub.entity-manager-factory',
+        'pineappleclub.app-configuration-service'
     ])
     .factory('UserProfileListService', UserProfileListService);
 
     UserProfileListService.$inject = [
-        'EntityManagerFactory'        
+        'EntityManagerFactory',
+        'AppConfigurationService'
     ];
 
-    function UserProfileListService(EntityManagerFactory, UserService) {
+    function UserProfileListService(EntityManagerFactory, AppConfigurationService) {
         var manager = EntityManagerFactory.getManager(),
             userProfileListService = {
                 getUsers: getUsers
@@ -20,10 +22,11 @@
         return userProfileListService;
 
         function getUsers(accountId, pageNumber) {
-            var query = breeze.EntityQuery.from('Users')
+            var pagination = AppConfigurationService.pagination,
+                query = breeze.EntityQuery.from('Users')
                         .where('account_id', '==', accountId)
-                        .skip(2 * (pageNumber - 1))
-                        .take(2)
+                        .skip(pagination.itemsPerPage * (pageNumber - 1))
+                        .take(pagination.itemsPerPage)
                         .inlineCount();
 
             return manager.executeQuery(query)

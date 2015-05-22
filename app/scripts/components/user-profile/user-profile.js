@@ -20,25 +20,24 @@
         'VIEW_MODES'
     ];
 
-    function UserProfileController($stateParams, UserProfileService, DataService, UserService, VIEW_MODES) {
-        var that = this;
+    function UserProfileController($stateParams, UserProfileService, DataService,
+        UserService, VIEW_MODES) {
 
-        that.user = UserService.getCurrentUser();
+        var that = this,
+            id = $stateParams.userId;
+
+        that.user = null;
 
         that.save = DataService.saveChanges();
-
         that.validate = validate;
-
         that.cancel = cancel;
-
         that.mode = mode;        
+                
+        UserProfileService.getUser(id).then(getUserSuccess);
 
-        if (that.mode() === VIEW_MODES.new) {
-            // create new entity
-        } else {
-            // useid to get user entity
+        function getUserSuccess(user) {
+            that.user = user;
         }
-
 
         function validate() {
             var user = that.user,

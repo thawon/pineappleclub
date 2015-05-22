@@ -96,7 +96,7 @@
                             return;
                         }
 
-                        errorDiv.html('');
+                        clearErrorMessage();
 
                         toaster.pop(waitToasterOptions);
 
@@ -105,6 +105,8 @@
                                 toaster.clear(waitToastId, waitToastId);
                                 
                                 toaster.pop(successtoasterOptions);
+
+                                clearErrorMessage();
 
                                 after();
 
@@ -124,6 +126,7 @@
 
                 function cancel() {
                     scope.cancelFn();
+                    clearErrorMessage();
                     changeMode(VIEW_MODES.show)();
                 }
 
@@ -131,6 +134,10 @@
                     var message = errors.join('</br>');
 
                     errorDiv.html(message);
+                }
+
+                function clearErrorMessage() {
+                    errorDiv.html('');
                 }
 
             },

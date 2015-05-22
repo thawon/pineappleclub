@@ -34,6 +34,9 @@
             getServiceName: getServiceName,
             breezejs: {
                 httpTimeout: 10000
+            },
+            pagination: {
+                itemsPerPage: 4
             }
         };
 
