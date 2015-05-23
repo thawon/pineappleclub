@@ -7,6 +7,10 @@
 
     HomeController.$inject = [];
 
-    function HomeController() {}
+    function HomeController() {
+        var that = this;
+
+        that.animation = 'zoom-animation';
+    }
 
 }());

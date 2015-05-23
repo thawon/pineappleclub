@@ -17,7 +17,7 @@
                     display: 'Home',
                     url: '/',
                     templateUrl: 'scripts/components/home/home.html',
-                    controller: 'HomeController as home',
+                    controller: 'HomeController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -32,6 +32,7 @@
                     display: 'Services',
                     url: '/services',
                     templateUrl: 'scripts/components/services/services.html',
+                    controller: 'ServicesController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -45,6 +46,7 @@
                     display: 'Philosophy',
                     url: '/philosophy',
                     templateUrl: 'scripts/components/philosophy/philosophy.html',
+                    controller: 'PhilosophyController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -58,7 +60,7 @@
                     display: 'Photos',
                     url: '/photos',
                     templateUrl: 'scripts/components/photos/photos.html',
-                    controller: 'PhotosController as photos',
+                    controller: 'PhotosController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -72,7 +74,7 @@
                     display: 'Contact',
                     url: '/contact',
                     templateUrl: 'scripts/components/contact/contact.html',
-                    controller: 'ContactController as contact',
+                    controller: 'ContactController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -125,7 +127,7 @@
                     display: 'My Profile',
                     url: '/user-profile/:userId?mode',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
-                    controller: 'UserProfileController as userProfile',
+                    controller: 'UserProfileController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {
@@ -140,7 +142,7 @@
                     display: 'Users',
                     url: '/user-profile-list',
                     templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
-                    controller: 'UserProfileListController as userProfileList',
+                    controller: 'UserProfileListController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {

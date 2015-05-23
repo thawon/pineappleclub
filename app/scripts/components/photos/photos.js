@@ -17,7 +17,7 @@
         var that = this;
 
         that.userId = AppConfigurationService.googlePlusUserId;
-
+        that.animation = 'zoom-animation';
     }
 
 }());

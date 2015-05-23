@@ -14,10 +14,11 @@
     ];
 
     function ContactController($location, AppConfigurationService) {
+        var that = this;
 
-        this.location = $location;
-        this.companyInfo = AppConfigurationService.companyInfo;
-
+        that.location = $location;
+        that.companyInfo = AppConfigurationService.companyInfo;
+        that.animation = 'zoom-animation';
     }
 
 }());

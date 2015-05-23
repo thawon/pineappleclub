@@ -26,6 +26,8 @@
         var that = this,
             id = $stateParams.userId;
 
+        that.animation = 'slide-horizontal-animation';
+
         that.user = null;
 
         that.save = DataService.saveChanges();

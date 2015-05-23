@@ -14,6 +14,8 @@
         'pineappleclub.home',
         'pineappleclub.navigator',
         'pineappleclub.contact',
+        'pineappleclub.philosophy',
+        'pineappleclub.services',
         'pineappleclub.photos',
         'pineappleclub.header-client',
         'pineappleclub.header-admin',

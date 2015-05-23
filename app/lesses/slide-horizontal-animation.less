@@ -1,0 +1,57 @@
+﻿.slide-horizontal-animation.ng-enter,.slide-horizontal-animation.ng-leave {
+    left: 0;
+    right: 0;
+    transition:0.9s all ease; 
+    -moz-transition:0.9s all ease; 
+    -webkit-transition:0.9s all ease; 
+}
+
+.slide-horizontal-animation.ng-enter {
+    opacity: 0;
+    -webkit-animation:slideInRight 0.9s both ease;
+    -moz-animation:slideInRight 0.9s both ease;
+    animation:slideInRight 0.9s both ease; 
+}
+
+.slide-horizontal-animation.ng-enter-active {
+    opacity: 1;
+}
+
+.slide-horizontal-animation.ng-leave {
+    opacity: 1;
+    -webkit-animation:slideOutLeft 0.9s both ease;
+    -moz-animation:slideOutLeft 0.9s both ease;
+    animation:slideOutLeft 0.9s both ease; 
+}
+
+.slide-horizontal-animation.ng-leave-active {
+    opacity: 0;
+}
+
+/* slide in from the right */
+@keyframes slideInRight {
+    from    { transform:translateX(200%); }
+    to      { transform: translateX(0); }
+}
+@-moz-keyframes slideInRight {
+    from    { -moz-transform:translateX(200%); }
+    to      { -moz-transform: translateX(0); }
+}
+@-webkit-keyframes slideInRight {
+    from    { -webkit-transform:translateX(200%); }
+    to      { -webkit-transform: translateX(0); }
+}
+
+/* slide in from the right */
+@keyframes slideOutLeft {
+    from    { transform:translateX(0); }
+    to      { transform: translateX(200%); }
+}
+@-moz-keyframes slideOutLeft {
+    from    { -moz-transform:translateX(0); }
+    to      { -moz-transform: translateX(200%); }
+}
+@-webkit-keyframes slideOutLeft {
+    from    { -webkit-transform:translateX(0); }
+    to      { -webkit-transform: translateX(200%); }
+}

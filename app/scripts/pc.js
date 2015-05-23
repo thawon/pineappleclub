@@ -14,6 +14,8 @@
         'pineappleclub.home',
         'pineappleclub.navigator',
         'pineappleclub.contact',
+        'pineappleclub.philosophy',
+        'pineappleclub.services',
         'pineappleclub.photos',
         'pineappleclub.header-client',
         'pineappleclub.header-admin',
@@ -135,10 +137,11 @@
     ];
 
     function ContactController($location, AppConfigurationService) {
+        var that = this;
 
-        this.location = $location;
-        this.companyInfo = AppConfigurationService.companyInfo;
-
+        that.location = $location;
+        that.companyInfo = AppConfigurationService.companyInfo;
+        that.animation = 'zoom-animation';
     }
 
 }());
@@ -323,7 +326,11 @@
 
     HomeController.$inject = [];
 
-    function HomeController() {}
+    function HomeController() {
+        var that = this;
+
+        that.animation = 'zoom-animation';
+    }
 
 }());
 (function () {
@@ -465,6 +472,22 @@
 
     'use strict';
 
+    angular.module('pineappleclub.philosophy', [])
+    .controller('PhilosophyController', PhilosophyController);
+
+    PhilosophyController.$inject = [];
+
+    function PhilosophyController() {
+        var that = this;
+
+        that.animation = 'zoom-animation';
+    }
+
+}());
+(function () {
+
+    'use strict';
+
     angular.module('pineappleclub.photos', [
         'pineappleclub.app-configuration-service',
         'pineappleclub.plus-gallery-directive'
@@ -480,7 +503,23 @@
         var that = this;
 
         that.userId = AppConfigurationService.googlePlusUserId;
+        that.animation = 'zoom-animation';
+    }
 
+}());
+(function () {
+
+    'use strict';
+
+    angular.module('pineappleclub.services', [])
+    .controller('ServicesController', ServicesController);
+
+    ServicesController.$inject = [];
+
+    function ServicesController() {
+        var that = this;
+
+        that.animation = 'zoom-animation';
     }
 
 }());
@@ -627,6 +666,8 @@
             pagination = AppConfigurationService.pagination,
             defaultPageNumber = 1;
 
+        that.animation = 'slide-horizontal-animation';
+
         that.account_id = UserService.getCurrentUser().account_id;
 
         that.users = null;
@@ -772,6 +813,8 @@
         var that = this,
             id = $stateParams.userId;
 
+        that.animation = 'slide-horizontal-animation';
+
         that.user = null;
 
         that.save = DataService.saveChanges();
@@ -844,7 +887,7 @@
                     display: 'Home',
                     url: '/',
                     templateUrl: 'scripts/components/home/home.html',
-                    controller: 'HomeController as home',
+                    controller: 'HomeController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -859,6 +902,7 @@
                     display: 'Services',
                     url: '/services',
                     templateUrl: 'scripts/components/services/services.html',
+                    controller: 'ServicesController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -872,6 +916,7 @@
                     display: 'Philosophy',
                     url: '/philosophy',
                     templateUrl: 'scripts/components/philosophy/philosophy.html',
+                    controller: 'PhilosophyController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -885,7 +930,7 @@
                     display: 'Photos',
                     url: '/photos',
                     templateUrl: 'scripts/components/photos/photos.html',
-                    controller: 'PhotosController as photos',
+                    controller: 'PhotosController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -899,7 +944,7 @@
                     display: 'Contact',
                     url: '/contact',
                     templateUrl: 'scripts/components/contact/contact.html',
-                    controller: 'ContactController as contact',
+                    controller: 'ContactController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.all],
                         page: {
@@ -952,7 +997,7 @@
                     display: 'My Profile',
                     url: '/user-profile/:userId?mode',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
-                    controller: 'UserProfileController as userProfile',
+                    controller: 'UserProfileController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {
@@ -967,7 +1012,7 @@
                     display: 'Users',
                     url: '/user-profile-list',
                     templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
-                    controller: 'UserProfileListController as userProfileList',
+                    controller: 'UserProfileListController as vm',
                     data: {
                         authorizedRoles: [USER_ROLES.admin],
                         page: {

@@ -1,10 +1,10 @@
 ﻿<!-- cn = contact -->
-<div ng-controller="ContactController as contact">
+<div ng-controller="ContactController as vm">
     <div>
 
         <h2>Contact Us</h2>
 
-        <div id="lc_location_div" class="col-lg-8" ng-show="(contact.location.path() === '/contact')">
+        <div id="lc_location_div" class="col-lg-8" ng-show="(vm.location.path() === '/contact')">
 
             <p>
                 We are within minutes walk from Rockdale or Banksia Train Station. Our location is suitable for families
@@ -26,7 +26,7 @@
                             Phone:
                         </td>
                         <td>
-                            <a ng-href="tel:{{contact.companyInfo.contact.phone}}" ng-bind="contact.companyInfo.contact.phone"></a>
+                            <a ng-href="tel:{{vm.companyInfo.contact.phone}}" ng-bind="vm.companyInfo.contact.phone"></a>
                         </td>
                     </tr>
                     <tr>
@@ -34,7 +34,7 @@
                             Mobile:
                         </td>
                         <td>
-                            <a ng-href="tel:{{contact.companyInfo.contact.mobile}}" ng-bind="contact.companyInfo.contact.mobile"></a>
+                            <a ng-href="tel:{{vm.companyInfo.contact.mobile}}" ng-bind="vm.companyInfo.contact.mobile"></a>
                         </td>
                     </tr>
                     <tr>
@@ -45,7 +45,7 @@
                             Email:
                         </td>
                         <td>
-                            <a ng-href="mailto:{{contact.companyInfo.contact.email}}" ng-bind="contact.companyInfo.contact.email"></a>
+                            <a ng-href="mailto:{{vm.companyInfo.contact.email}}" ng-bind="vm.companyInfo.contact.email"></a>
                         </td>
                     </tr>
                 </tbody>

@@ -26,6 +26,8 @@
             pagination = AppConfigurationService.pagination,
             defaultPageNumber = 1;
 
+        that.animation = 'slide-horizontal-animation';
+
         that.account_id = UserService.getCurrentUser().account_id;
 
         that.users = null;

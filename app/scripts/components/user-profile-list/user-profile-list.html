@@ -1,6 +1,6 @@
 ﻿<div class="container user-profile-list">
     <div>
-        <button class="btn btn-sm btn-primary user-profile-list-create-button" ng-click="userProfileList.create()">Create new user</button>
+        <button class="btn btn-sm btn-primary user-profile-list-create-button" ng-click="vm.create()">Create new user</button>
         <h2>Users</h2>
     </div>
     
@@ -9,10 +9,10 @@
         <button class="btn btn-sm btn-primary" ng-click="search()">Search</button>
     </div>
 
-    <div class="user-profile-list-item" ng-click="userProfileList.showDetails(user)"
-         dir-paginate="user in userProfileList.users | itemsPerPage: userProfileList.itemsPerPage"
-         total-items="userProfileList.totalUsers"
-         current-page="userProfileList.pagination.current">
+    <div class="user-profile-list-item" ng-click="vm.showDetails(user)"
+         dir-paginate="user in vm.users | itemsPerPage: vm.itemsPerPage"
+         total-items="vm.totalUsers"
+         current-page="vm.pagination.current">
 
         <div class="user-profile-list-name-div">
             <span ng-bind="user.fullname"></span>
@@ -23,5 +23,5 @@
         </span>
     </div>
 
-    <dir-pagination-controls on-page-change="userProfileList.pageChanged(newPageNumber)"></dir-pagination-controls>
+    <dir-pagination-controls on-page-change="vm.pageChanged(newPageNumber)"></dir-pagination-controls>
 </div>
