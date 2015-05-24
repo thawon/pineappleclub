@@ -8,6 +8,7 @@
         'ngResource',
         'ngProgress',
         'ngCookies',
+        'ncy-angular-breadcrumb',
         'toaster',
         'angularUtils.directives.dirPagination',
         'pineappleclub.application',
@@ -30,9 +31,17 @@
         'pineappleclub.auth-interceptor-service'
     ])
     .config(['$locationProvider', '$stateProvider', '$urlRouterProvider', '$httpProvider',
-        'AUTHORISATION',
+        '$breadcrumbProvider', 'AUTHORISATION',
     function ($locationProvider, $stateProvider, $urlRouterProvider, $httpProvider,
-        AUTHORISATION) {
+        $breadcrumbProvider, AUTHORISATION) {
+
+        $breadcrumbProvider.setOptions({
+            templateUrl: 'scripts/breadcrumb.html'
+        });
+
+        //$breadcrumbProvider.setOptions({
+        //    template: '<div><a ng-repeat="step in steps" ui-sref="{{step.name}}"> > </a> </div>'
+        //});
 
         $locationProvider.html5Mode({
             enabled: true
@@ -46,6 +55,10 @@
                     url: state.url,
                     templateUrl: state.templateUrl,
                     controller: state.controller,
+                    ncyBreadcrumb: {
+                        label: state.label,
+                        parent: state.parent
+                    },
                     data: state.data
                 })
         });

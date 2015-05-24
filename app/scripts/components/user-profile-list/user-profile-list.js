@@ -60,6 +60,7 @@
         function showDetails(user) {            
             var state = 'user-profile',
                 params = {
+                    from: 'user-profile-list',
                     userId: user.id,
                     mode: VIEW_MODES.show
                 };

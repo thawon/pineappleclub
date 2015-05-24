@@ -3,16 +3,17 @@
     <div id="ds_header_div">
         Welcome <span>{{dashboard.currentUser.firstname + ' ' + dashboard.currentUser.lastname}}</span>
     </div>
-    <div id="hm_items_div" class="container">
+    <div id="hm_items_div" class="container text-center">
 
-        <div ng-repeat="state in dashboard.states" class="col-xs-4 col-sm-3">
-            <div class="thumbnail img-responsive tile-size">
-                <a ui-sref="{{state.name}}"><img class="tile-image" ng-src="{{state.icon}}"><span ng-bind="state.display"></span></a>                
+        <div ng-repeat="state in dashboard.states" class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
+            <div class="thumbnail img-responsive dashboard-{{state.display}}" >
+                <a  ui-sref="{{state.name}}">
+                    <img class="tile-image" ng-src="{{state.data.dashboard.icon}}">
+                </a>
+                <div class="tile-caption">
+                      <span ng-bind="state.display"></span>
+                </div>       
             </div>
         </div>
-
-        <!--<div class="thumbnail img-responsive tile-size">
-            <a ui-sref="user-profile({userId:'fooVal1', mode:'edit'})"><img class="tile-image"><span>my profile test</span></a>
-        </div>-->
     </div>
 </div>

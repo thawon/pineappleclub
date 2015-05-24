@@ -8,6 +8,7 @@
         'ngResource',
         'ngProgress',
         'ngCookies',
+        'ncy-angular-breadcrumb',
         'toaster',
         'angularUtils.directives.dirPagination',
         'pineappleclub.application',
@@ -30,9 +31,17 @@
         'pineappleclub.auth-interceptor-service'
     ])
     .config(['$locationProvider', '$stateProvider', '$urlRouterProvider', '$httpProvider',
-        'AUTHORISATION',
+        '$breadcrumbProvider', 'AUTHORISATION',
     function ($locationProvider, $stateProvider, $urlRouterProvider, $httpProvider,
-        AUTHORISATION) {
+        $breadcrumbProvider, AUTHORISATION) {
+
+        $breadcrumbProvider.setOptions({
+            templateUrl: 'scripts/breadcrumb.html'
+        });
+
+        //$breadcrumbProvider.setOptions({
+        //    template: '<div><a ng-repeat="step in steps" ui-sref="{{step.name}}"> > </a> </div>'
+        //});
 
         $locationProvider.html5Mode({
             enabled: true
@@ -46,6 +55,10 @@
                     url: state.url,
                     templateUrl: state.templateUrl,
                     controller: state.controller,
+                    ncyBreadcrumb: {
+                        label: state.label,
+                        parent: state.parent
+                    },
                     data: state.data
                 })
         });
@@ -167,14 +180,14 @@
             states, userProfileState, userProfilestateParams;
 
         that.currentUser = UserService.getCurrentUser();
-
+        
         states = _.filter(AUTHORISATION.STATES.states,
             function (state) {
                 return (state.data.authorizedRoles.indexOf(that.currentUser.userRole) !== -1)
                         && state.name !== 'dashboard'
                         && state.name !== 'user-profile';
             });
-
+        
         userProfileState = _.clone(_.first(_.filter(AUTHORISATION.STATES.states,
             function (state) {
                 return (state.name == 'user-profile');
@@ -183,7 +196,8 @@
         states.unshift(userProfileState);
 
         userProfilestateParams = {
-            userId: that.currentUser._id,
+            from: 'dashboard',
+            userId: (that.currentUser._id || that.currentUser.id),
             mode: VIEW_MODES.show
         };
         userProfileState.name += '(' + JSON.stringify(userProfilestateParams) + ')';
@@ -700,6 +714,7 @@
         function showDetails(user) {            
             var state = 'user-profile',
                 params = {
+                    from: 'user-profile-list',
                     userId: user.id,
                     mode: VIEW_MODES.show
                 };
@@ -814,6 +829,7 @@
             id = $stateParams.userId;
 
         that.animation = 'slide-horizontal-animation';
+        that.cameFrom = $stateParams.from;
 
         that.user = null;
 
@@ -886,6 +902,7 @@
                     name: 'home',
                     display: 'Home',
                     url: '/',
+                    label: 'Home',
                     templateUrl: 'scripts/components/home/home.html',
                     controller: 'HomeController as vm',
                     data: {
@@ -957,6 +974,7 @@
                     name: 'dashboard',
                     display: 'Dashboard',
                     url: '/dashboard',
+                    label: 'Dashboard',
                     templateUrl: 'scripts/components/dashboard/dashboard.html',
                     controller: 'DashboardController as dashboard',
                     data: {
@@ -994,8 +1012,13 @@
                 },
                 {
                     name: 'user-profile',
-                    display: 'My Profile',
-                    url: '/user-profile/:userId?mode',
+                    display: 'My-Profile',
+                    label: 'Profile',
+                    parent: function ($scope) {
+                        // TODO: donot use scope
+                        return $scope.vm.cameFrom ? $scope.vm.cameFrom : 'dashboard';
+                    },
+                    url: '/user-profile/:userId?mode?from',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as vm',
                     data: {
@@ -1003,13 +1026,17 @@
                         page: {
                             title: 'User Profile Details',
                             description: 'View/Edit user profile'
+                        },
+                        dashboard: {
+                            icon: '/images/user-profile.png'
                         }
-                    },
-                    icon: '/images/user-profile.png'
+                    }
                 },
                 {
                     name: 'user-profile-list',
                     display: 'Users',
+                    label: 'Users',
+                    parent: 'dashboard',
                     url: '/user-profile-list',
                     templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
                     controller: 'UserProfileListController as vm',
@@ -1018,9 +1045,11 @@
                         page: {
                             title: 'Users',
                             description: 'List of users'
+                        },
+                        dashboard: {
+                            icon: '/images/imageedit_1_7225282855.gif'
                         }
-                    },
-                    icon: '/images/user-profile-list.png'
+                    }
                 }
             ]
     };

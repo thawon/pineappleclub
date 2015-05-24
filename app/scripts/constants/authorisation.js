@@ -16,6 +16,7 @@
                     name: 'home',
                     display: 'Home',
                     url: '/',
+                    label: 'Home',
                     templateUrl: 'scripts/components/home/home.html',
                     controller: 'HomeController as vm',
                     data: {
@@ -87,6 +88,7 @@
                     name: 'dashboard',
                     display: 'Dashboard',
                     url: '/dashboard',
+                    label: 'Dashboard',
                     templateUrl: 'scripts/components/dashboard/dashboard.html',
                     controller: 'DashboardController as dashboard',
                     data: {
@@ -124,8 +126,13 @@
                 },
                 {
                     name: 'user-profile',
-                    display: 'My Profile',
-                    url: '/user-profile/:userId?mode',
+                    display: 'My-Profile',
+                    label: 'Profile',
+                    parent: function ($scope) {
+                        // TODO: donot use scope
+                        return $scope.vm.cameFrom ? $scope.vm.cameFrom : 'dashboard';
+                    },
+                    url: '/user-profile/:userId?mode?from',
                     templateUrl: 'scripts/components/user-profile/user-profile.html',
                     controller: 'UserProfileController as vm',
                     data: {
@@ -133,13 +140,17 @@
                         page: {
                             title: 'User Profile Details',
                             description: 'View/Edit user profile'
+                        },
+                        dashboard: {
+                            icon: '/images/user-profile.png'
                         }
-                    },
-                    icon: '/images/user-profile.png'
+                    }
                 },
                 {
                     name: 'user-profile-list',
                     display: 'Users',
+                    label: 'Users',
+                    parent: 'dashboard',
                     url: '/user-profile-list',
                     templateUrl: 'scripts/components/user-profile-list/user-profile-list.html',
                     controller: 'UserProfileListController as vm',
@@ -148,9 +159,11 @@
                         page: {
                             title: 'Users',
                             description: 'List of users'
+                        },
+                        dashboard: {
+                            icon: '/images/imageedit_1_7225282855.gif'
                         }
-                    },
-                    icon: '/images/user-profile-list.png'
+                    }
                 }
             ]
     };

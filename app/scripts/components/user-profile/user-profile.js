@@ -27,6 +27,7 @@
             id = $stateParams.userId;
 
         that.animation = 'slide-horizontal-animation';
+        that.cameFrom = $stateParams.from;
 
         that.user = null;
 
