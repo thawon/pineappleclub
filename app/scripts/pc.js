@@ -21,6 +21,7 @@
         'pineappleclub.header-client',
         'pineappleclub.header-admin',
         'pineappleclub.footer',
+        'pineappleclub.footer-admin',
         'pineappleclub.side-bar',
         'pineappleclub.dashboard',
         'pineappleclub.login',
@@ -210,16 +211,54 @@
 
     'use strict';
 
+    angular.module('pineappleclub.footer-admin', [
+        'pineappleclub.authorisation-constant',
+        'pineappleclub.user-service'
+    ])
+    .controller('FooterAdminController', FooterAdminController);
+
+    FooterAdminController.$inject = [
+        '$rootScope',
+        'AUTHORISATION',
+        'UserService'
+    ];
+
+    function FooterAdminController($rootScope, AUTHORISATION, UserService) {
+        var that = this;
+
+        that.isShown = false;
+        
+        $rootScope.$on("$stateChangeSuccess", function (event, next) {
+            var allowedStates = _.filter(AUTHORISATION.STATES.states,
+                                    function (state) {
+                                        return state.name === "login"
+                                            || state.name === "signout"
+                                            || state.data.authorizedRoles.indexOf(AUTHORISATION.USER_ROLES.admin) !== -1;
+                                    });
+
+            that.isShown = (_.find(allowedStates, function (state) { return state.name === next.name; }))
+                                ? true : false;
+
+            that.currentUser = UserService.getCurrentUser();
+        });
+    }
+
+}());
+(function () {
+
+    'use strict';
+
     angular.module('pineappleclub.footer', [
         'pineappleclub.authorisation-constant'
     ])
     .controller('FooterController', FooterController);
 
     FooterController.$inject = [
+        '$rootScope',
         'AUTHORISATION'
     ];
 
-    function FooterController(AUTHORISATION) {
+    function FooterController($rootScope, AUTHORISATION) {
         var that = this,
             states;
 
@@ -229,6 +268,19 @@
                     || state.name === 'contact';
             });
 
+        that.isShown = false;
+
+        $rootScope.$on("$stateChangeSuccess", function (event, next) {
+            var allowedStates = _.filter(AUTHORISATION.STATES.states,
+                                    function (state) {
+                                        return state.data.authorizedRoles.indexOf(AUTHORISATION.USER_ROLES.admin) === -1
+                                                && state.name !== 'login'
+                                                && state.name !== 'signout';
+                                    });
+
+            that.isShown = (_.find(allowedStates, function (state) { return state.name === next.name; }))
+                                ? true : false;
+        });
 
         that.states = states;
     }

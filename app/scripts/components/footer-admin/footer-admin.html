@@ -1,0 +1,25 @@
+﻿<!-- ft = footer -->
+<div ng-show="vm.isShown" ng-controller="FooterAdminController as vm">
+    <div id="footer-admin">
+        <div class="container">
+            <div class="row">
+                <div id="ft_last_sign_in_div" class="col-lg-12">
+                    <span id="ft_last_sign_in_span">
+                        Last sign-in: {{vm.currentUser.lastLoggedInDateTime | date:'MMMM dd yyyy, h:mm a'}}
+                    </span>
+                </div>
+                <div id="ft_div" class="col-lg-12">
+                    <ul class="list-inline">
+                        <span id="ft_header_span">Pineapple Club</span>
+                        <li class="pull-right">
+                            <a class="footer-link">Help Desk</a>
+                        </li>
+                        <li class="pull-right">
+                            <a class="footer-link">About</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

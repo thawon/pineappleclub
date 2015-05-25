@@ -1,12 +1,12 @@
 ﻿<!-- ft = footer -->
-<div ng-controller="FooterController as footer">
+<div ng-show="vm.isShown"  ng-controller="FooterController as vm">
     <div class="footer">
         <div class="container">
             <div class="row">
                 <div class="col-lg-2">
                     <ul class="list-no-bullet list-no-padding-left">
                         <span>About</span>
-                        <li ng-repeat="state in footer.states">
+                        <li ng-repeat="state in vm.states">
                             <a class="footer-link" ui-sref="{{state.name}}" ng-bind="state.display"></a>
                         </li>
                     </ul>

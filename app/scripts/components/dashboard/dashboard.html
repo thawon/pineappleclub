@@ -6,13 +6,13 @@
     <div id="hm_items_div" class="container text-center">
 
         <div ng-repeat="state in dashboard.states" class="col-xs-6 col-sm-6 col-md-4 col-lg-3">
-            <div class="thumbnail img-responsive dashboard-{{state.display}}" >
+            <div class="thumbnail img-responsive dashboard-{{state.display}}" style="background-color:#ffffff;border: 0px;">
                 <a  ui-sref="{{state.name}}">
                     <img class="tile-image" ng-src="{{state.data.dashboard.icon}}">
-                </a>
-                <div class="tile-caption">
-                      <span ng-bind="state.display"></span>
-                </div>       
+                </a>                       
+            </div>
+            <div class="tile-caption dashboard-{{state.display}}" style="opacity:0.8; margin-top:-20px;">
+                <span ng-bind="state.display"></span>
             </div>
         </div>
     </div>

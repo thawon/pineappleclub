@@ -20,11 +20,13 @@ html(lang="en", ng-app="pineappleclub")
       div.row.row-offcanvas.row-offcanvas-right
         div.col-xs-12.col-sm-12 
           div(ng-include="'scripts/components/navigator/navigator.html'")
+          div(ng-include="'scripts/components/header-admin/header-admin.html'")
           div(ng-include="'scripts/components/header-client/header-client.html'")
           div(ncy-breadcrumb)
           div(class="{{vm.animation}}", ui-view)
         div(ng-include="'scripts/components/side-bar/side-bar.html'")
       div(ng-include="'scripts/components/footer/footer.html'")
+      div(ng-include="'scripts/components/footer-admin/footer-admin.html'")
     div.device-xs.visible-xs
     div.device-sm.visible-sm
     div.device-md.visible-md

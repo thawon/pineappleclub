@@ -21,6 +21,7 @@
         'pineappleclub.header-client',
         'pineappleclub.header-admin',
         'pineappleclub.footer',
+        'pineappleclub.footer-admin',
         'pineappleclub.side-bar',
         'pineappleclub.dashboard',
         'pineappleclub.login',
