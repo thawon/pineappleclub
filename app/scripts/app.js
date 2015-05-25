@@ -37,7 +37,7 @@
         $breadcrumbProvider, AUTHORISATION) {
 
         $breadcrumbProvider.setOptions({
-            templateUrl: 'scripts/breadcrumb.html'
+            templateUrl: 'scripts/components/breadcrumb/breadcrumb.html'
         });
 
         //$breadcrumbProvider.setOptions({

@@ -37,7 +37,7 @@
         $breadcrumbProvider, AUTHORISATION) {
 
         $breadcrumbProvider.setOptions({
-            templateUrl: 'scripts/breadcrumb.html'
+            templateUrl: 'scripts/components/breadcrumb/breadcrumb.html'
         });
 
         //$breadcrumbProvider.setOptions({
@@ -227,7 +227,8 @@
         var that = this;
 
         that.isShown = false;
-        
+        that.isShownLastLoggedIn = false;
+
         $rootScope.$on("$stateChangeSuccess", function (event, next) {
             var allowedStates = _.filter(AUTHORISATION.STATES.states,
                                     function (state) {
@@ -238,6 +239,9 @@
 
             that.isShown = (_.find(allowedStates, function (state) { return state.name === next.name; }))
                                 ? true : false;
+
+            that.isShownLastLoggedIn = (next.name !== 'login'
+                                        && next.name !== 'signout') ? true : false;
 
             that.currentUser = UserService.getCurrentUser();
         });
@@ -1099,7 +1103,7 @@
                             description: 'List of users'
                         },
                         dashboard: {
-                            icon: '/images/imageedit_1_7225282855.gif'
+                            icon: '/images/user-profile-list.png'
                         }
                     }
                 }

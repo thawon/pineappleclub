@@ -18,7 +18,8 @@
         var that = this;
 
         that.isShown = false;
-        
+        that.isShownLastLoggedIn = false;
+
         $rootScope.$on("$stateChangeSuccess", function (event, next) {
             var allowedStates = _.filter(AUTHORISATION.STATES.states,
                                     function (state) {
@@ -29,6 +30,9 @@
 
             that.isShown = (_.find(allowedStates, function (state) { return state.name === next.name; }))
                                 ? true : false;
+
+            that.isShownLastLoggedIn = (next.name !== 'login'
+                                        && next.name !== 'signout') ? true : false;
 
             that.currentUser = UserService.getCurrentUser();
         });

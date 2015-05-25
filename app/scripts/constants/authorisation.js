@@ -161,7 +161,7 @@
                             description: 'List of users'
                         },
                         dashboard: {
-                            icon: '/images/imageedit_1_7225282855.gif'
+                            icon: '/images/user-profile-list.png'
                         }
                     }
                 }

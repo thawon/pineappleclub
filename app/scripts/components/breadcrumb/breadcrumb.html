@@ -1,0 +1,6 @@
+﻿<ol ng-show="(steps.length > 1)" class="breadcrumb">
+    <li ng-repeat="step in steps" ng-class="{active: $last}" ng-switch="$last || !!step.abstract">
+        <a class="btn btn-sm btn-success breadcrumb-btn" ng-switch-when="false" ui-sref="{{step.name}}">{{step.ncyBreadcrumbLabel}}</a>
+        <button ng-switch-when="true" type="button" class="btn btn-sm btn-default breadcrumb-current">{{step.ncyBreadcrumbLabel}}</button>
+    </li>
+</ol>
